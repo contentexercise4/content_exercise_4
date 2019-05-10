@@ -57,7 +57,7 @@ Sample.cpp
 まず,  content_exercise_4　へディレクトリを移動します.
 そこで、コマンドプロンプト上で以下を入力します
 
-git pull origin master
+git pull origin emaster
 
 以上です.
 難しいっすね. 頑張ろうぜ!
