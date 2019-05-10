@@ -60,6 +60,6 @@ Sample.cpp
 git pull origin master
 
 以上です.
-難しいっすね.
+難しいっすね. 頑張ろうぜ!
 
 
