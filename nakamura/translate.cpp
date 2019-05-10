@@ -1,3 +1,4 @@
+﻿
 #include "pch.h"
 #include <iostream>
 #include <GL/glew.h>
@@ -9,11 +10,11 @@ double zoomx = 0.0, zoomy = 0.0, zoomz = 0.0;
 
 void display(void)
 {
-	glClear(GL_COLOR_BUFFER_BIT);       // カラーバッファを初期化する
+	glClear(GL_COLOR_BUFFER_BIT);       	// カラーバッファを初期化する
 	glColor3f(0.0f, 0.0f, 1.0f);		// これから描画する図形の色は青
-	glutWireCube(5.0);			        // ワイヤーフレーム立方体を描画
+	glutWireCube(5.0);			// ワイヤーフレーム立方体を描画
 
-	glFlush();				            // 描画を行う
+	glFlush();				// 描画を行う
 }
 
 
@@ -37,7 +38,7 @@ void reshape(int width, int height) {
 
 void initialize(void)
 {
-	glClearColor(1.0, 1.0, 1.0, 1.0);	    // 画面を白にする
+	glClearColor(1.0, 1.0, 1.0, 1.0);			    	// 画面を白にする
 }
 
 void aswz(unsigned char key, int x,int y)
@@ -98,9 +99,9 @@ int main(int argc, char** argv)
 
 {
 	glutInit(&argc, argv);						// GLUTを初期化する
-	glutInitWindowSize(800, 600);				// 画面サイズを指定する
-	glutInitWindowPosition(800, 300);			// 画面の初期位置を指定する
-	glutInitDisplayMode(GLUT_RGBA);	          	// 表示モード設定
+	glutInitWindowSize(800, 600);				     	// 画面サイズを指定する
+	glutInitWindowPosition(800, 300);			    	// 画面の初期位置を指定する
+	glutInitDisplayMode(GLUT_RGBA);				    	// 表示モード設定
 	glutCreateWindow("translate");		  		// ウィンドウの名前
 
 	// コールバック関数の設定
@@ -108,8 +109,8 @@ int main(int argc, char** argv)
 	glutSpecialFunc(hokokey);
 	glutKeyboardFunc(aswz);
 
-	glutDisplayFunc(display);				// 描画処理が必要なときに呼ばれる
-	glutReshapeFunc(reshape);				// reshapeが必要なときに呼ばれる
+	glutDisplayFunc(display);					// 描画処理が必要なときに呼ばれる
+	glutReshapeFunc(reshape);					// reshapeが必要なときに呼ばれる
 
 	initialize();							// 初期化
 	glutMainLoop();							// 毎フレームのLoop
