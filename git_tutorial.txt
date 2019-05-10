@@ -31,9 +31,20 @@ Sample.cpp
 content_exercise_4/sekine　内(作業ディレクトリ)で
 コマンドプロンプト上で以下を入力する
 
-git add "Sample.cpp"
+git branch
+
+すると, 多分こんな感じに表示されます
+
+* develop
+  master
+
+* develop が、ローカルリポジトリのbranch
+  master が、リモートリポジトリのbranch
+
+以上を確認した上で、コマンドプロンプト上で以下を入力します
+
 git commit -a -m "任意のコメント"
-git push origin master
+git push origin develop:master
 
 これをコミットと言います.  -aオプションは変更を自動検出してくれるものです
 コミットすると、リモートリポジトリにローカルリポジトリ上で変更した情報が更新されます
