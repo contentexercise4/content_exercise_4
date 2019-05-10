@@ -49,5 +49,6 @@ Sample.cpp
 git pull origin master
 
 以上です.
+難しいっすね.
 
 
