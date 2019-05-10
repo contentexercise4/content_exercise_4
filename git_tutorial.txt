@@ -28,10 +28,12 @@ Sample.cpp
 というファイルを新たに作成したとします。これをリモートリポジトリ (メンバーがインターネット上で見れるGitHubのcontentexercise4のページ)
 へ反映させる方法を記します
 
-content_exercise_4/sekine　内で
+content_exercise_4/sekine　内(作業ディレクトリ)で
 コマンドプロンプト上で以下を入力する
 
+git add "Sample.cpp"
 git commit -a -m "任意のコメント"
+git push origin master
 
 これをコミットと言います.  -aオプションは変更を自動検出してくれるものです
 コミットすると、リモートリポジトリにローカルリポジトリ上で変更した情報が更新されます
