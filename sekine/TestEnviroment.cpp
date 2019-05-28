@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 5
+#define N 7
 
 using namespace glm;
 
@@ -33,7 +33,8 @@ float verticalAngle = 0.0f;
 glm::vec3 position = glm::vec3(0, 0, 5);
 int vercount = 0;
 int vercount2 = 0;
-double cube[47][4] = { 0 };  //cube[47][x_max,x_min,z_max,z_min]
+double cube[47][4] = { 0 }; //cube[47][x_max,x_min,z_max,z_min]
+int ModeSelect = 0;			//画面遷移に用いる. 0:スタート画面 1:プレイ画面 2:リザルト画面
 
 // 3頂点を表す3つのベクトルの配列
 
@@ -505,6 +506,11 @@ void computeMatricesFromInputs(GLFWwindow* window) {
 		FoV = initialFoV + 5 * 3.0f;
 	}
 
+	// Enterキーを押したらプレイ画面に遷移します
+	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+		ModeSelect = 1;
+	}
+
 	// 射影行列：視野45&deg;、4:3比、描画範囲0.1単位100単位
 	ProjectionM = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);
 	//ProjectionM = glm::perspective(glm::radians(initialFoV), 4.0f / 3.0f, 0.1f, 100.0f);
@@ -799,7 +805,7 @@ int main() {
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
+	/*
 		int ver = 0, ver2 = 0, ver3 = 0;
 
 		// これが頂点バッファを指し示すものとなります。
@@ -999,10 +1005,10 @@ int main() {
 		// 頂点をOpenGLに渡します。
 
 		//glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-*/
+	*/
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	
 	//新しい部分. 上の処理をコンパクトにした.
 	// #define N 5 が21行目に定義されています. .obj(OBJFile) と.bmp(Texture) を増やすときはNの値も1増やしてください. 
 
@@ -1020,6 +1026,8 @@ int main() {
 	OBJFile[2] = "itemsample.obj";
 	OBJFile[3] = "start.obj";
 	OBJFile[4] = "title.obj";
+	OBJFile[5] = "enter.obj";
+	OBJFile[6] = "start.obj";
 
 	GLuint Texture[N];					//.bmpファイルを読み込み, 関数 loadBMP_custom() の中でIDを割り当てられる. (すなわち, IDを持つ)
 	Texture[0] = loadBMP_custom("texsample.bmp");
@@ -1027,6 +1035,10 @@ int main() {
 	Texture[2] = loadBMP_custom("sampletex.bmp");
 	Texture[3] = loadBMP_custom("start.bmp");
 	Texture[4] = loadBMP_custom("black.bmp");
+	Texture[5] = loadBMP_custom("enter.bmp");
+	Texture[6] = loadBMP_custom("result.bmp");
+
+
 
 	for (int i = 0; i < N; i++) {
 		//コメントアウトした 722行目 ～ 925行目の処理をまとめた関数
@@ -1094,7 +1106,8 @@ int main() {
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	int p = 0;
-
+	int flush = 0;		//1000に到達したら0に戻す
+	
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == GL_FALSE) {
 		glClearColor(0.2f, 0.2f, 0.2f, 0.0f);					// おまじない
 		glEnable(GL_DEPTH_TEST);								// デプステストを有効にする
@@ -1113,65 +1126,85 @@ int main() {
 		glm::mat4 ModelMatrix = glm::mat4(1.0);
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-
 		// 現在バインドしているシェーダの"MVP" uniformに変換を送る
 		// レンダリングする各モデルごと、なぜならMVPが違うからです。(少なくともMの部分が違います。)
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-		// シェーダを使う
+		if (ModeSelect == 0) {
 
-		//glUseProgram(programID);
+			flush++;
+			
+			//スタート画面を描画
+			glBindTexture(GL_TEXTURE_2D, Texture[3]);
+			glBindVertexArray(VertexArrayID[3]);
+			//三角形の描画！
+			//glDrawArrays(GL_TRIANGLES, 0, ver4); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+			glDrawArrays(GL_TRIANGLES, 0, ver[3]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+			
+			//真っ黒な画面を張り付けるオブジェクトを描画
+			glBindTexture(GL_TEXTURE_2D, Texture[4]);
+			glBindVertexArray(VertexArrayID[4]);
+			//三角形の描画！
+			//glDrawArrays(GL_TRIANGLES, 0, ver5); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+			glDrawArrays(GL_TRIANGLES, 0, ver[4]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+			
+			if (flush < 500) {
+				//Enter画面を張り付けるオブジェクトを描画
+				glBindTexture(GL_TEXTURE_2D, Texture[5]);
+				glBindVertexArray(VertexArrayID[5]);
+				//三角形の描画！
+				//glDrawArrays(GL_TRIANGLES, 0, ver4); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+				glDrawArrays(GL_TRIANGLES, 0, ver[5]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+			}
+			else if (flush == 1000) {
+				flush = 0;
+			}
+		}
 
-		//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices, GL_STATIC_DRAW);
-		//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+		if (ModeSelect == 1) {
 
+			// シェーダを使う
 
-		// 三角形を描きます！
-		//glDrawArrays(GL_TRIANGLES, 0, 3); // 頂点0から始まります。合計3つの頂点です。&rarr;1つの三角形です。
+			//glUseProgram(programID);
 
-		// カメラのほうを向いていない法線の三角形をカリングします。
-		//glEnable(GL_CULL_FACE);
-
-		//壁を描画
-		glBindTexture(GL_TEXTURE_2D, Texture[0]);
-		glBindVertexArray(VertexArrayID[0]);
-		//三角形の描画！
-		//glDrawArrays(GL_TRIANGLES, 0, ver); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
-		glDrawArrays(GL_TRIANGLES, 0, ver[0]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
-
-		//glDrawArrays(GL_TRIANGLES, 0, 72);
-		//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-
-		//床を描画
-		glBindTexture(GL_TEXTURE_2D, Texture[1]);
-		glBindVertexArray(VertexArrayID[1]);
-		//三角形の描画！
-		//glDrawArrays(GL_TRIANGLES, 0, ver2); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
-		glDrawArrays(GL_TRIANGLES, 0, ver[1]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
-
-		//アイテムを描画
-		glBindTexture(GL_TEXTURE_2D, Texture[2]);
-		glBindVertexArray(VertexArrayID[2]);
-		//三角形の描画！
-		//glDrawArrays(GL_TRIANGLES, 0, ver3); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
-		glDrawArrays(GL_TRIANGLES, 0, ver[2]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
-
-		//真っ黒な画面を張り付けるオブジェクトを描画
-		glBindTexture(GL_TEXTURE_2D, Texture[3]);
-		glBindVertexArray(VertexArrayID[3]);
-		//三角形の描画！
-		//glDrawArrays(GL_TRIANGLES, 0, ver4); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
-		glDrawArrays(GL_TRIANGLES, 0, ver[3]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
-
-		//スタート画面を描画
-		glBindTexture(GL_TEXTURE_2D, Texture[4]);
-		glBindVertexArray(VertexArrayID[4]);
-		//三角形の描画！
-		//glDrawArrays(GL_TRIANGLES, 0, ver5); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
-		glDrawArrays(GL_TRIANGLES, 0, ver[4]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+			//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices, GL_STATIC_DRAW);
+			//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
 
-		//glDisableVertexAttribArray(0);
+			// 三角形を描きます！
+			//glDrawArrays(GL_TRIANGLES, 0, 3); // 頂点0から始まります。合計3つの頂点です。&rarr;1つの三角形です。
+
+			// カメラのほうを向いていない法線の三角形をカリングします。
+			//glEnable(GL_CULL_FACE);
+
+
+
+			//壁を描画
+			glBindTexture(GL_TEXTURE_2D, Texture[0]);
+			glBindVertexArray(VertexArrayID[0]);
+			//三角形の描画！
+			//glDrawArrays(GL_TRIANGLES, 0, ver); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+			glDrawArrays(GL_TRIANGLES, 0, ver[0]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+
+			//glDrawArrays(GL_TRIANGLES, 0, 72);
+			//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+
+			//床を描画
+			glBindTexture(GL_TEXTURE_2D, Texture[1]);
+			glBindVertexArray(VertexArrayID[1]);
+			//三角形の描画！
+			//glDrawArrays(GL_TRIANGLES, 0, ver2); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+			glDrawArrays(GL_TRIANGLES, 0, ver[1]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+
+			//アイテムを描画
+			glBindTexture(GL_TEXTURE_2D, Texture[2]);
+			glBindVertexArray(VertexArrayID[2]);
+			//三角形の描画！
+			//glDrawArrays(GL_TRIANGLES, 0, ver3); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+			glDrawArrays(GL_TRIANGLES, 0, ver[2]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+
+			//glDisableVertexAttribArray(0);
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
