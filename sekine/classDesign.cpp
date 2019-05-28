@@ -122,7 +122,7 @@ public:
     }
 };
 
-class Player : public virtual Charactor{
+class Player : public Charactor{
 private:
 
 public:
@@ -151,9 +151,10 @@ public:
         this->PlayerDirX = PlayerDirX;
 		this->PlayerDirZ = PlayerDirZ;
 	}
+
 };
 
-class Enemy : public virtual Charactor{
+class Enemy : public Charactor{
 private:
 
 public:
@@ -209,27 +210,27 @@ public:
 参考URL(https://programming-place.net/ppp/contents/cpp/language/030.html#multiple_inheritance)
 */
 
-class Item : public Player, public Enemy{
+class Item{
 private:
     int AttriVal = 5;     //Itemの属性値 = 5
 
 public:
-    //プレイヤーのライフを増減する
-    void ChangePlayerLife(int ChangeLife){
-        this->Player::ChangeLife(ChangeLife);
-    }
-    //プレイヤーのスピードを増減させる
-    void ChangePlayerSpeed(int ChangeSpeed){
-        int PrevSpeedX = this->Player::ReturnSpeedX();
-        int PrevSpeedZ = this->Player::ReturnSpeedZ();
-        this->Player::SetSpeed(PrevSpeedX+ChangeSpeed, PrevSpeedZ+ChangeSpeed);
-    }
-    //敵のスピードを増減させる
-    void ChangeEnemySpeed(int ChangeSpeed){
-        int PrevSpeedX = this->Enemy::ReturnSpeedX();
-        int PrevSpeedZ = this->Enemy::ReturnSpeedZ();
-        this->Enemy::SetSpeed(PrevSpeedX+ChangeSpeed, PrevSpeedZ+ChangeSpeed);
-    }
+    // //プレイヤーのライフを増減する
+    // void ChangePlayerLife(int ChangeLife){
+    //     this->Player::ChangeLife(ChangeLife);
+    // }
+    // //プレイヤーのスピードを増減させる
+    // void ChangePlayerSpeed(int ChangeSpeed){
+    //     int PrevSpeedX = this->Player::ReturnSpeedX();
+    //     int PrevSpeedZ = this->Player::ReturnSpeedZ();
+    //     this->Player::SetSpeed(PrevSpeedX+ChangeSpeed, PrevSpeedZ+ChangeSpeed);
+    // }
+    // //敵のスピードを増減させる
+    // void ChangeEnemySpeed(int ChangeSpeed){
+    //     int PrevSpeedX = this->Enemy::ReturnSpeedX();
+    //     int PrevSpeedZ = this->Enemy::ReturnSpeedZ();
+    //     this->Enemy::SetSpeed(PrevSpeedX+ChangeSpeed, PrevSpeedZ+ChangeSpeed);
+    // }
 };
 
 int main(){
