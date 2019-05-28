@@ -28,10 +28,14 @@ glm::mat4 ViewM;
 // 水平角、-Z方向
 float horizontalAngle = 3.14f;
 // 鉛直角、0、水平線を眺めている
-float verticalAngle = 0.1f;
+float verticalAngle = 0.0f;
 // 位置
 glm::vec3 position = glm::vec3(0, 0, 5);
 int vercount = 0;
+int vercount2 = 0;
+
+double cube[47][4] = { 0 };  //cube[47][x_max,x_min,z_max,z_min]
+
 
 // 3頂点を表す3つのベクトルの配列
 
@@ -341,6 +345,16 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 	return ProgramID;
 }
 
+bool hit(double cube[47][4]) {
+	for (int i = 0;i < 47;i++) {
+		if ((position.x < cube[i][0] && position.x > cube[i][1]) &&
+			(position.z < cube[i][2] && position.z > cube[i][3])) {
+			return true;
+		}
+	}
+}
+
+
 void computeMatricesFromInputs(GLFWwindow* window) {
 
 
@@ -356,7 +370,7 @@ void computeMatricesFromInputs(GLFWwindow* window) {
 	// 初期視野
 	float initialFoV = 45.0f;
 
-	float speed = 3.0f; // 3 units / second
+	float speed = 4.0f; // 3 units / second
 	float mouseSpeed = 0.005f;
 
 	double currentTime = glfwGetTime();
@@ -367,19 +381,19 @@ void computeMatricesFromInputs(GLFWwindow* window) {
 	int xpos = 512, ypos = 384;
 	// 右を向きます。
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		xpos -= 256;
+		xpos -= 156;
 	}
 	//左を向きます。
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		xpos += 256;
+		xpos += 156;
 	}
 	// 上を向きます。
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		ypos += 192;
+		ypos += 96;
 	}
 	// 下を向きます。
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		ypos -= 192;
+		ypos -= 96;
 	}
 
 	// 新たな方向を計算します。
@@ -406,18 +420,30 @@ void computeMatricesFromInputs(GLFWwindow* window) {
 	// 前へ動きます。
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		position += direction * deltaTime * speed;
+		if (hit(cube) == true) {
+			position -= direction * deltaTime * speed;
+		}
 	}
 	// 後ろへ動きます。
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		position -= direction * deltaTime * speed;
+		if (hit(cube) == true) {
+			position += direction * deltaTime * speed;
+		}
 	}
 	// 前を向いたまま、右へ平行移動します。
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		position += right * deltaTime * speed;
+		if (hit(cube) == true) {
+			position -= right * deltaTime * speed;
+		}
 	}
 	// 前を向いたまま、左へ平行移動します。
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		position -= right * deltaTime * speed;
+		if (hit(cube) == true) {
+			position += right * deltaTime * speed;
+		}
 	}
 
 	float FoV = 45.0f;
@@ -459,7 +485,7 @@ glm::mat4 getViewMatrix() {
 	return ViewM;
 }
 
-bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vector<glm::vec2>  & out_uvs, std::vector<glm::vec3>  & out_normals) {
+bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vector<glm::vec2>  & out_uvs, std::vector<glm::vec3>  & out_normals, int &ver) {
 
 	std::vector<int> vertexIndices, uvIndices, normalIndices;
 	std::vector<glm::vec3> temp_vertices;
@@ -480,18 +506,15 @@ bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vec
 	while (1) {
 
 		// 行の最初の文字列を読み込みます。
-		//int res = fscanf(file, "%s", lineHeader);
-		
 		int res = fscanf_s(file, "%s", lineHeader, _countof(lineHeader));
 		if (res == EOF) {
-
 			printf("b");
 			// 各三角形の各頂点
 			for (unsigned int i = 0; i < vertexIndices.size(); i++) {
 				unsigned int vertexIndexa = vertexIndices[i];
 				glm::vec3 vertex = temp_vertices[vertexIndexa - 1];
 				out_vertices.push_back(vertex);
-				vercount++;
+				ver++;
 				//std::cout << vertexIndex;
 			}
 			printf("v");
@@ -513,9 +536,6 @@ bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vec
 			printf("a");
 			break; // EOF = End Of File. ループを終了します。
 		}
-		
-			
-	
 		// そうでなければlineHeaderをパースします。
 
 		if (strcmp(lineHeader, "v") == 0) {
@@ -559,13 +579,13 @@ bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vec
 			printf("e");
 		}
 
-	}
 
+	}
 
 	return true;
 }
 
-bool loadOBJnoUV(const char * path, std::vector<glm::vec3>  & out_vertices, std::vector<glm::vec3>  & out_normals) {
+bool loadOBJnoUV(const char * path, std::vector<glm::vec3>  & out_vertices, std::vector<glm::vec3>  & out_normals, int &ver) {
 
 	std::vector<int> vertexIndices, normalIndices;
 	std::vector<glm::vec3> temp_vertices;
@@ -594,7 +614,7 @@ bool loadOBJnoUV(const char * path, std::vector<glm::vec3>  & out_vertices, std:
 				unsigned int vertexIndexa = vertexIndices[i];
 				glm::vec3 vertex = temp_vertices[vertexIndexa - 1];
 				out_vertices.push_back(vertex);
-				vercount++;
+				ver++;
 				//std::cout << vertexIndex;
 			}
 			printf("v");
@@ -658,7 +678,7 @@ int main() {
 	}
 
 	// ウィンドウ生成
-	GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Simple", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1280, 640, "OpenGL Simple", NULL, NULL);
 
 	if (window == NULL) {
 		fprintf(stderr, "GLFWウィンドウのオープンに失敗しました。 もしIntelのGPUならば, 3.3に対応していません。チュートリアルのバージョン2.1を試してください。n");
@@ -686,84 +706,256 @@ int main() {
 		return -1;
 	}
 
+	int ver = 0, ver2 = 0, ver3 = 0;
+
+
+	// これが頂点バッファを指し示すものとなります。
+	GLuint vertexbuffer;
+	// バッファを1つ作り、vertexbufferに結果IDを入れます。
+	glGenBuffers(1, &vertexbuffer);
+	// 次のコマンドは'vertexbuffer'バッファについてです。
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+
+	// .objファイルを読み込みます。
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3>  normals; // すぐには使いません。
+	//bool res = loadOBJnoUV("mapsample1.obj", vertices, normals,ver);
+	//bool res = loadOBJnoUV("MapBottom3.obj", vertices, normals, ver);
+	bool res = loadOBJnoUV("Map01_wall.obj", vertices, normals, ver);
+	//bool res = loadOBJnoUV("cube.obj", vertices, normals);
+	//bool res = loadOBJnoUV("kantan1.obj", vertices, normals);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+
+	//GLuint colorbuffer;
+	//glGenBuffers(1, &colorbuffer);
+	//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+
+
+	// これが頂点バッファを指し示すものとなります。
+	GLuint vertexbuffer2;
+	// バッファを1つ作り、vertexbufferに結果IDを入れます。
+	glGenBuffers(1, &vertexbuffer2);
+	// 次のコマンドは'vertexbuffer'バッファについてです。
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+
+	// .objファイルを読み込みます。
+	std::vector<glm::vec3> vertices2;
+	std::vector<glm::vec3>  normals2; // すぐには使いません。
+	//bool res = loadOBJnoUV("mapsample1.obj", vertices, normals);
+	bool res2 = loadOBJnoUV("ball.obj", vertices2, normals2, ver2);
+	//bool res2 = loadOBJnoUV("kantan1.obj", vertices2, normals2,ver2);
+	glBufferData(GL_ARRAY_BUFFER, vertices2.size() * sizeof(glm::vec3), &vertices2[0], GL_STATIC_DRAW);
+
+
+	//GLuint colorbuffer2;
+	//glGenBuffers(1, &colorbuffer2);
+	//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer2);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+
+
+		// これが頂点バッファを指し示すものとなります。
+	GLuint vertexbuffer3;
+	// バッファを1つ作り、vertexbufferに結果IDを入れます。
+	glGenBuffers(1, &vertexbuffer3);
+	// 次のコマンドは'vertexbuffer'バッファについてです。
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
+
+	// .objファイルを読み込みます。
+	std::vector<glm::vec3> vertices3;
+	std::vector<glm::vec3>  normals3; // すぐには使いません。
+	//bool res = loadOBJnoUV("mapsample1.obj", vertices, normals);
+	bool res3 = loadOBJnoUV("Map01_bottom.obj", vertices3, normals3, ver3);
+	//bool res2 = loadOBJnoUV("kantan1.obj", vertices2, normals2,ver2);
+	glBufferData(GL_ARRAY_BUFFER, vertices3.size() * sizeof(glm::vec3), &vertices3[0], GL_STATIC_DRAW);
+
+
+	//GLuint colorbuffer2;
+	//glGenBuffers(1, &colorbuffer2);
+	//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer2);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
-	//printf("a");
+	// 最初の属性バッファ：頂点
 
-	// これが頂点バッファを指し示すものとなります。
-	GLuint vertexbuffer;
-
-	// バッファを1つ作り、vertexbufferに結果IDを入れます。
-	glGenBuffers(1, &vertexbuffer);
-
-	// 次のコマンドは'vertexbuffer'バッファについてです。
+	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // 属性0：0に特に理由はありません。しかし、シェーダ内のlayoutとあわせないといけません。
+		3,                  // サイズ
+		GL_FLOAT,           // タイプ
+		GL_FALSE,           // 正規化？
+		0,                  // ストライド
+		(void*)0            // 配列バッファオフセット
+	);
+
+
+	// 2nd attribute buffer : colors
+	glEnableVertexAttribArray(1);
+	//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glVertexAttribPointer(
+		1,                                // 属性。1という数字に意味はありません。ただしシェーダのlayoutとあわせる必要があります。
+		3,                                // サイズ
+		GL_FLOAT,                         // タイプ
+		GL_FALSE,                         // 正規化？
+		0,                                // ストライド
+		(void*)0                          // 配列バッファオフセット
+	);
+
+
+	GLuint VertexArrayID2;
+	glGenVertexArrays(1, &VertexArrayID2);
+	glBindVertexArray(VertexArrayID2);
+
+	// 最初の属性バッファ：頂点
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glVertexAttribPointer(
+		0,                  // 属性0：0に特に理由はありません。しかし、シェーダ内のlayoutとあわせないといけません。
+		3,                  // サイズ
+		GL_FLOAT,           // タイプ
+		GL_FALSE,           // 正規化？
+		0,                  // ストライド
+		(void*)0            // 配列バッファオフセット
+	);
+
+
+	// 2nd attribute buffer : colors
+	glEnableVertexAttribArray(1);
+	//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer2);
+	glVertexAttribPointer(
+		1,                                // 属性。1という数字に意味はありません。ただしシェーダのlayoutとあわせる必要があります。
+		3,                                // サイズ
+		GL_FLOAT,                         // タイプ
+		GL_FALSE,                         // 正規化？
+		0,                                // ストライド
+		(void*)0                          // 配列バッファオフセット
+	);
+
+	GLuint VertexArrayID3;
+	glGenVertexArrays(1, &VertexArrayID3);
+	glBindVertexArray(VertexArrayID3);
+
+	// 最初の属性バッファ：頂点
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
+	glVertexAttribPointer(
+		0,                  // 属性0：0に特に理由はありません。しかし、シェーダ内のlayoutとあわせないといけません。
+		3,                  // サイズ
+		GL_FLOAT,           // タイプ
+		GL_FALSE,           // 正規化？
+		0,                  // ストライド
+		(void*)0            // 配列バッファオフセット
+	);
+
+
+	// 2nd attribute buffer : colors
+	glEnableVertexAttribArray(1);
+	//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer3);
+	glVertexAttribPointer(
+		1,                                // 属性。1という数字に意味はありません。ただしシェーダのlayoutとあわせる必要があります。
+		3,                                // サイズ
+		GL_FLOAT,                         // タイプ
+		GL_FALSE,                         // 正規化？
+		0,                                // ストライド
+		(void*)0                          // 配列バッファオフセット
+	);
 
 	// 頂点をOpenGLに渡します。
 
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-		// .objファイルを読み込みます。
-	/*
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3>  normals; // すぐには使いません。
-	bool res = loadOBJnoUV("mapsample1.obj", vertices, normals);
-	//bool res = loadOBJnoUV("kantan1.obj", vertices, normals);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	*/
 
-
-
-
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3>  normals; // すぐには使いません。
-	bool res = loadOBJnoUV("cube.obj", vertices, normals);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	
-
-	printf("\n");
-	printf("%d\n", vertices.size());
-
-	glm::vec3 cube(0,0,0);
-
-	for (int i = 0;i < vertices.size();i++) {
-		printf("%f\n", vertices[i]);
-		/*if (i % 3 == 0) cube.x += vertices[i].x;
-		else if (i % 3 == 1) cube.y += vertices[i].y;
-		else if (i % 3 == 2) cube.z += vertices[i].z;
-		*/
-		cube.x += vertices[i].x;
-		cube.y += vertices[i].y;
-		cube.z += vertices[i].z;
-	}
-	printf("%.5f  %.5f  %.5f\n", cube.x, cube.y, cube.z);
-
-
-
-
-
-	GLuint colorbuffer;
-	glGenBuffers(1, &colorbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
 	// 三角形を描きます！
 	//glDrawArrays(GL_TRIANGLES, 0, 3); // 頂点0から始まります。合計3つの頂点です。&rarr;1つの三角形です。
 
-	//glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(0);
 
 	// 三角形の描画！
 	//glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
 
+	printf("\n");
+	printf("%d\n", vertices.size());
+
+	//int ws = (int)(vertices.size())/ 36;
+	
+	double x_max = 0, x_min = 0, z_max = 0, z_min = 0;
+	double tmp;
+	int ik = 0, il = 0;
+	int k = 1, l = 1;
+
+	while (1) {
+		if (ik % 36 == 0) {
+			tmp = vertices[ik].x;
+			ik++;
+		}
+		while (tmp == vertices[ik].x) {
+			ik++;
+		}
+		if (tmp > vertices[ik].x) {
+			x_max = tmp;
+			x_min = vertices[ik].x;
+		}
+		else {
+			x_max = vertices[ik].x;
+			x_min = tmp;
+		}
+		cube[k - 1][0] = x_max;
+		cube[k - 1][1] = x_min;
+		ik = k * 36;
+		k++;
+		if (k == 48) { break; }
+	}
+	while (1) {
+		if (il % 36 == 0) {
+			tmp = vertices[il].z;
+			il++;
+		}
+		while (tmp == vertices[il].z) {
+			il++;
+		}
+		if (tmp > vertices[il].z) {
+			z_max = tmp;
+			z_min = vertices[il].z;
+		}
+		else {
+			z_max = vertices[il].z;
+			z_min = tmp;
+		}
+		cube[l - 1][2] = z_max;
+		cube[l - 1][3] = z_min;
+		il = l * 36;
+		l++;
+		if (l == 48) { break; }
+	}
+
+	std::cout << k << "   " << l << "     " << (int)(vertices.size()) / 36 << "\n";
+
+
+
+	/*
+	for (int i = 0; i < vertices.size(); i++) {
+		cube.x += vertices[i].x;
+		cube.y += vertices[i].y;
+		cube.z += vertices[i].z;
+	}
+	printf("%.5f  %.5f  %.5f\n", cube.x, cube.y, cube.z);
+	*/
 
 
 	glfwSwapInterval(1);
+
+
 
 	if (glewInit() != GLEW_OK) {
 		return -1;
@@ -796,15 +988,18 @@ int main() {
 	//GLuint MatrixID2 = glGetUniformLocation(programID2, "MVP");
 
 	GLuint Texture = loadBMP_custom("texsample.bmp");
-
-	printf("%d", vercount);
-
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	GLuint Texture2 = loadBMP_custom("sampletex.bmp");
+	GLuint Texture3 = loadBMP_custom("mapbottom.bmp");
+	printf("%d", ver);
+	printf("%d", ver2);
 
 
 
 	// 下でエスケープキーが押されるのを捉えるのを保証します。
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+
+
+	int p = 0;
 
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == GL_FALSE) {
 		glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
@@ -814,6 +1009,14 @@ int main() {
 		glDepthFunc(GL_LESS);
 		// スクリーンをクリアする
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		if (hit(cube)==true) {
+			p++;
+			std::cout << "atari"<<p<<"\n";
+		}
+
+
 
 
 
@@ -836,33 +1039,6 @@ int main() {
 		//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices, GL_STATIC_DRAW);
 		//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-		// 最初の属性バッファ：頂点
-
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glVertexAttribPointer(
-			0,                  // 属性0：0に特に理由はありません。しかし、シェーダ内のlayoutとあわせないといけません。
-			3,                  // サイズ
-			GL_FLOAT,           // タイプ
-			GL_FALSE,           // 正規化？
-			0,                  // ストライド
-			(void*)0            // 配列バッファオフセット
-		);
-
-
-		// 2nd attribute buffer : colors
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-		glVertexAttribPointer(
-			1,                                // 属性。1という数字に意味はありません。ただしシェーダのlayoutとあわせる必要があります。
-			3,                                // サイズ
-			GL_FLOAT,                         // タイプ
-			GL_FALSE,                         // 正規化？
-			0,                                // ストライド
-			(void*)0                          // 配列バッファオフセット
-		);
-
-
 
 		// 三角形を描きます！
 		//glDrawArrays(GL_TRIANGLES, 0, 3); // 頂点0から始まります。合計3つの頂点です。&rarr;1つの三角形です。
@@ -871,29 +1047,36 @@ int main() {
 		//glEnable(GL_CULL_FACE);
 
 
-
+		glBindTexture(GL_TEXTURE_2D, Texture);
+		glBindVertexArray(VertexArrayID);
 		//三角形の描画！
-		glDrawArrays(GL_TRIANGLES, 0, vercount); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+		glDrawArrays(GL_TRIANGLES, 0, ver); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+
 		//glDrawArrays(GL_TRIANGLES, 0, 72);
 		//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices, GL_STATIC_DRAW);
 
 
-		glDisableVertexAttribArray(0);
+		glBindTexture(GL_TEXTURE_2D, Texture2);
+		glBindVertexArray(VertexArrayID2);
+		//三角形の描画！
+		glDrawArrays(GL_TRIANGLES, 0, ver2); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+
+
+		glBindTexture(GL_TEXTURE_2D, Texture3);
+		glBindVertexArray(VertexArrayID3);
+		//三角形の描画！
+		glDrawArrays(GL_TRIANGLES, 0, ver3); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
+
+
+		//glDisableVertexAttribArray(0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		//printf("%3f  %3f  %3f\n", position.x, position.y, position.z);
 
-		if (fabs(position.x - cube.x) < 1.0 && fabs(position.z - cube.z) < 1.0) {
-			std::cout << "当たっています\n";
-		}
-		else {
-			std::cout << "当たってないよーーーーーーー\n";
-		}
 
 	}
-	
+
 	glfwTerminate();
 
 	return 0;
@@ -902,3 +1085,77 @@ int main() {
 
 }
 
+
+// プログラムの実行: Ctrl + F5 または [デバッグ] > [デバッグなしで開始] メニュー
+// プログラムのデバッグ: F5 または [デバッグ] > [デバッグの開始] メニュー
+
+// 作業を開始するためのヒント: 
+//    1. ソリューション エクスプローラー ウィンドウを使用してファイルを追加/管理します 
+//   2. チーム エクスプローラー ウィンドウを使用してソース管理に接続します
+//   3. 出力ウィンドウを使用して、ビルド出力とその他のメッセージを表示します
+//   4. エラー一覧ウィンドウを使用してエラーを表示します
+//   5. [プロジェクト] > [新しい項目の追加] と移動して新しいコード ファイルを作成するか、[プロジェクト] > [既存の項目の追加] と移動して既存のコード ファイルをプロジェクトに追加します
+//   6. 後ほどこのプロジェクトを再び開く場合、[ファイル] > [開く] > [プロジェクト] と移動して .sln ファイルを選択します
+
+/*
+行列入門
+glm::mat4 myMatrix;
+glm::vec4 myVector;
+// 何らかの方法でmyMatrixとmyVector満たす。
+glm::vec4 transformedVector = myMatrix * myVector; // もう一度言いますが、この順番です！これは重要なことです
+平行移動行列
+glm::mat4 myMatrix = glm::translate(glm::mat4(), glm::vec3(10.0f, 0.0f, 0.0f));
+glm::vec4 myVector(10.0f, 10.0f, 10.0f, 0.0f);
+glm::vec4 transformedVector = myMatrix * myVector; // guess the result
+単位行列
+glm::mat4 myIdentityMatrix = glm::mat4(1.0f);
+拡大縮小行列
+glm::mat4 myScalingMatrix = glm::scale(2.0f, 2.0f ,2.0f);
+回転行列
+glm::vec3 myRotationAxis( ??, ??, ??);
+glm::rotate( angle_in_degrees, myRotationAxis );
+変換の組み合わせ
+TransformedVector = TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector;
+
+glm::mat4 myModelMatrix = myTranslationMatrix * myRotationMatrix * myScaleMatrix;
+glm::vec4 myTransformedVector = myModelMatrix * myOriginalVector;
+
+ビュー行列
+// #include <glm/gtc/matrix_transform.hpp> と #include <glm/gtx/transform.hpp> を使います。
+glm::mat4 ViewMatrix = glm::translate(glm::mat4(), glm::vec3(-3.0f, 0.0f, 0.0f));
+
+glm::mat4 CameraMatrix = glm::LookAt(
+	cameraPosition, // ワールド空間でのカメラの位置
+	cameraTarget,   // ワールド空間での見たい位置
+	upVector        // たぶんglm::vec3(0,1,0)です。一方で(0,-1,0)にしたら上下逆さまになります。それもまた良いでしょう。
+);
+
+射影行列
+// 読むのが難しい行列を作ります。それでも、普通の標準の4x4行列です。
+glm::mat4 projectionMatrix = glm::perspective(
+	glm::radians(FoV), // 垂直方向のビューの広がり度合い（ラジアン）。つまり、"ズーム"の度合い。"カメラレンズ"を考えてください。通常90&deg;(超ワイド) と 30&deg; (とてもズームインしてる)の間です。
+	4.0f / 3.0f,       // アスペクト比。ウィンドウのサイズに依存します。4/3 == 800/600 == 1280/960となっています。
+	0.1f,              // 近くのクリッピング平面。できるだけ大きくします。そうしないと正確さの問題が出てくるでしょう。
+	100.0f             // 遠くのクリッピング平面。できるだけ小さくします。
+);
+
+
+*/
+/*
+mat4 myMatrix;
+vec4 myVector;
+// 何らかの方法でmyMatrixとmyVector満たす。
+vec4 transformedVector = myMatrix * myVector; // そうです、GLMととても似ています。
+
+vec4 transformedVector = myMatrix * myVector;
+*/
+
+/*
+
+#version 330 core
+layout(location = 0) in vec3 vertexPosition_modelspace;
+void main() {
+	gl_Position.xyz = vertexPosition_modelspace;
+	gl_Position.w = 1.0;
+}
+*/
