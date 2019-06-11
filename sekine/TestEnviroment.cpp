@@ -2,46 +2,46 @@
 //
 
 #include"pch.h"
-//#include "lib.h"
+#include "lib.h"
 #include "MusicController.h"
 
-#include<iostream>
-#include<vector>
-#include<fstream>
-#include<sstream>
-#include<string>
-#include <algorithm>
-#include<GL/glew.h>
-#include<GLFW/glfw3.h>
-#include<glm/glm.hpp>
-#include <glm/gtx/transform.hpp> // <glm/glm.hpp>の後
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-#include<GL/glut.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <windows.h>
-#include <MMSystem.h>
-
-#include "MusicController.h"
-
-#define N 7
-
-using namespace glm;
-
-double lastTime;
-glm::mat4 ProjectionM;
-glm::mat4 ViewM;
-// 水平角、-Z方向
-float horizontalAngle = 3.14f;
-// 鉛直角、0、水平線を眺めている
-float verticalAngle = 0.0f;
-// 位置
-glm::vec3 position = glm::vec3(0, 0, 5);
-int vercount = 0;
-int vercount2 = 0;
-double cube[47][4] = { 0 }; //cube[47][x_max,x_min,z_max,z_min]
-int ModeSelect = 0;			//画面遷移に用いる. 0:スタート画面 1:プレイ画面 2:リザルト画面
+//#include<iostream>
+//#include<vector>
+//#include<fstream>
+//#include<sstream>
+//#include<string>
+//#include <algorithm>
+//#include<GL/glew.h>
+//#include<GLFW/glfw3.h>
+//#include<glm/glm.hpp>
+//#include <glm/gtx/transform.hpp> // <glm/glm.hpp>の後
+//#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/gtx/transform.hpp>
+//#include<GL/glut.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <windows.h>
+//#include <MMSystem.h>
+//
+//#include "MusicController.h"
+//
+//#define N 7
+//
+//using namespace glm;
+//
+//double lastTime;
+//glm::mat4 ProjectionM;
+//glm::mat4 ViewM;
+//// 水平角、-Z方向
+//float horizontalAngle = 3.14f;
+//// 鉛直角、0、水平線を眺めている
+//float verticalAngle = 0.0f;
+//// 位置
+//glm::vec3 position = glm::vec3(0, 0, 5);
+//int vercount = 0;
+//int vercount2 = 0;
+//double cube[47][4] = { 0 }; //cube[47][x_max,x_min,z_max,z_min]
+//int ModeSelect = 0;			//画面遷移に用いる. 0:スタート画面 1:プレイ画面 2:リザルト画面
 
 // 3頂点を表す3つのベクトルの配列
 // 頂点。3つの連続する数字は3次元の頂点です。3つの連続する頂点は三角形を意味します。
