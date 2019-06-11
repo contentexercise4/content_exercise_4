@@ -2,6 +2,9 @@
 //
 
 #include"pch.h"
+//#include "lib.h"
+#include "MusicController.h"
+
 #include<iostream>
 #include<vector>
 #include<fstream>
@@ -17,6 +20,10 @@
 #include<GL/glut.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
+#include <MMSystem.h>
+
+#include "MusicController.h"
 
 #define N 7
 
@@ -37,128 +44,126 @@ double cube[47][4] = { 0 }; //cube[47][x_max,x_min,z_max,z_min]
 int ModeSelect = 0;			//画面遷移に用いる. 0:スタート画面 1:プレイ画面 2:リザルト画面
 
 // 3頂点を表す3つのベクトルの配列
-
 // 頂点。3つの連続する数字は3次元の頂点です。3つの連続する頂点は三角形を意味します。
 // 立方体は、それぞれが2枚の三角形からなる6面から成ります。だから6*2=12枚の三角形と12*3個の頂点を作ります。
-static const GLfloat g_vertex_buffer_data[] = {
-	-1.0f,-1.0f,-1.0f, // 三角形1:開始
-	-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, // 三角形1:終了
-	1.0f, 1.0f,-1.0f, // 三角形2:開始
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f, // 三角形2:終了
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f
-};
-
-
-// 各頂点に一つの色。これらはランダムに作られました。
-static const GLfloat g_color_buffer_data[] = {
-	0.583f,  0.771f,  0.014f,
-	0.609f,  0.115f,  0.436f,
-	0.327f,  0.483f,  0.844f,
-	0.822f,  0.569f,  0.201f,
-	0.435f,  0.602f,  0.223f,
-	0.310f,  0.747f,  0.185f,
-	0.597f,  0.770f,  0.761f,
-	0.559f,  0.436f,  0.730f,
-	0.359f,  0.583f,  0.152f,
-	0.483f,  0.596f,  0.789f,
-	0.559f,  0.861f,  0.639f,
-	0.195f,  0.548f,  0.859f,
-	0.014f,  0.184f,  0.576f,
-	0.771f,  0.328f,  0.970f,
-	0.406f,  0.615f,  0.116f,
-	0.676f,  0.977f,  0.133f,
-	0.971f,  0.572f,  0.833f,
-	0.140f,  0.616f,  0.489f,
-	0.997f,  0.513f,  0.064f,
-	0.945f,  0.719f,  0.592f,
-	0.543f,  0.021f,  0.978f,
-	0.279f,  0.317f,  0.505f,
-	0.167f,  0.620f,  0.077f,
-	0.347f,  0.857f,  0.137f,
-	0.055f,  0.953f,  0.042f,
-	0.714f,  0.505f,  0.345f,
-	0.783f,  0.290f,  0.734f,
-	0.722f,  0.645f,  0.174f,
-	0.302f,  0.455f,  0.848f,
-	0.225f,  0.587f,  0.040f,
-	0.517f,  0.713f,  0.338f,
-	0.053f,  0.959f,  0.120f,
-	0.393f,  0.621f,  0.362f,
-	0.673f,  0.211f,  0.457f,
-	0.820f,  0.883f,  0.371f,
-	0.982f,  0.099f,  0.879f
-};
-
-// 各頂点に2つの値、これらはBlenderで作りました。どうやって作るかはこれから説明します。
-static const GLfloat g_uv_buffer_data[] = {
-	0.000059f, 1.0f - 0.000004f,
-	0.000103f, 1.0f - 0.336048f,
-	0.335973f, 1.0f - 0.335903f,
-	1.000023f, 1.0f - 0.000013f,
-	0.667979f, 1.0f - 0.335851f,
-	0.999958f, 1.0f - 0.336064f,
-	0.667979f, 1.0f - 0.335851f,
-	0.336024f, 1.0f - 0.671877f,
-	0.667969f, 1.0f - 0.671889f,
-	1.000023f, 1.0f - 0.000013f,
-	0.668104f, 1.0f - 0.000013f,
-	0.667979f, 1.0f - 0.335851f,
-	0.000059f, 1.0f - 0.000004f,
-	0.335973f, 1.0f - 0.335903f,
-	0.336098f, 1.0f - 0.000071f,
-	0.667979f, 1.0f - 0.335851f,
-	0.335973f, 1.0f - 0.335903f,
-	0.336024f, 1.0f - 0.671877f,
-	1.000004f, 1.0f - 0.671847f,
-	0.999958f, 1.0f - 0.336064f,
-	0.667979f, 1.0f - 0.335851f,
-	0.668104f, 1.0f - 0.000013f,
-	0.335973f, 1.0f - 0.335903f,
-	0.667979f, 1.0f - 0.335851f,
-	0.335973f, 1.0f - 0.335903f,
-	0.668104f, 1.0f - 0.000013f,
-	0.336098f, 1.0f - 0.000071f,
-	0.000103f, 1.0f - 0.336048f,
-	0.000004f, 1.0f - 0.671870f,
-	0.336024f, 1.0f - 0.671877f,
-	0.000103f, 1.0f - 0.336048f,
-	0.336024f, 1.0f - 0.671877f,
-	0.335973f, 1.0f - 0.335903f,
-	0.667969f, 1.0f - 0.671889f,
-	1.000004f, 1.0f - 0.671847f,
-	0.667979f, 1.0f - 0.335851f
-};
+//static const GLfloat g_vertex_buffer_data[] = {
+//	-1.0f,-1.0f,-1.0f, // 三角形1:開始
+//	-1.0f,-1.0f, 1.0f,
+//	-1.0f, 1.0f, 1.0f, // 三角形1:終了
+//	1.0f, 1.0f,-1.0f, // 三角形2:開始
+//	-1.0f,-1.0f,-1.0f,
+//	-1.0f, 1.0f,-1.0f, // 三角形2:終了
+//	1.0f,-1.0f, 1.0f,
+//	-1.0f,-1.0f,-1.0f,
+//	1.0f,-1.0f,-1.0f,
+//	1.0f, 1.0f,-1.0f,
+//	1.0f,-1.0f,-1.0f,
+//	-1.0f,-1.0f,-1.0f,
+//	-1.0f,-1.0f,-1.0f,
+//	-1.0f, 1.0f, 1.0f,
+//	-1.0f, 1.0f,-1.0f,
+//	1.0f,-1.0f, 1.0f,
+//	-1.0f,-1.0f, 1.0f,
+//	-1.0f,-1.0f,-1.0f,
+//	-1.0f, 1.0f, 1.0f,
+//	-1.0f,-1.0f, 1.0f,
+//	1.0f,-1.0f, 1.0f,
+//	1.0f, 1.0f, 1.0f,
+//	1.0f,-1.0f,-1.0f,
+//	1.0f, 1.0f,-1.0f,
+//	1.0f,-1.0f,-1.0f,
+//	1.0f, 1.0f, 1.0f,
+//	1.0f,-1.0f, 1.0f,
+//	1.0f, 1.0f, 1.0f,
+//	1.0f, 1.0f,-1.0f,
+//	-1.0f, 1.0f,-1.0f,
+//	1.0f, 1.0f, 1.0f,
+//	-1.0f, 1.0f,-1.0f,
+//	-1.0f, 1.0f, 1.0f,
+//	1.0f, 1.0f, 1.0f,
+//	-1.0f, 1.0f, 1.0f,
+//	1.0f,-1.0f, 1.0f
+//};
+//
+//// 各頂点に一つの色。これらはランダムに作られました。
+//static const GLfloat g_color_buffer_data[] = {
+//	0.583f,  0.771f,  0.014f,
+//	0.609f,  0.115f,  0.436f,
+//	0.327f,  0.483f,  0.844f,
+//	0.822f,  0.569f,  0.201f,
+//	0.435f,  0.602f,  0.223f,
+//	0.310f,  0.747f,  0.185f,
+//	0.597f,  0.770f,  0.761f,
+//	0.559f,  0.436f,  0.730f,
+//	0.359f,  0.583f,  0.152f,
+//	0.483f,  0.596f,  0.789f,
+//	0.559f,  0.861f,  0.639f,
+//	0.195f,  0.548f,  0.859f,
+//	0.014f,  0.184f,  0.576f,
+//	0.771f,  0.328f,  0.970f,
+//	0.406f,  0.615f,  0.116f,
+//	0.676f,  0.977f,  0.133f,
+//	0.971f,  0.572f,  0.833f,
+//	0.140f,  0.616f,  0.489f,
+//	0.997f,  0.513f,  0.064f,
+//	0.945f,  0.719f,  0.592f,
+//	0.543f,  0.021f,  0.978f,
+//	0.279f,  0.317f,  0.505f,
+//	0.167f,  0.620f,  0.077f,
+//	0.347f,  0.857f,  0.137f,
+//	0.055f,  0.953f,  0.042f,
+//	0.714f,  0.505f,  0.345f,
+//	0.783f,  0.290f,  0.734f,
+//	0.722f,  0.645f,  0.174f,
+//	0.302f,  0.455f,  0.848f,
+//	0.225f,  0.587f,  0.040f,
+//	0.517f,  0.713f,  0.338f,
+//	0.053f,  0.959f,  0.120f,
+//	0.393f,  0.621f,  0.362f,
+//	0.673f,  0.211f,  0.457f,
+//	0.820f,  0.883f,  0.371f,
+//	0.982f,  0.099f,  0.879f
+//};
+//
+//// 各頂点に2つの値、これらはBlenderで作りました。どうやって作るかはこれから説明します。
+//static const GLfloat g_uv_buffer_data[] = {
+//	0.000059f, 1.0f - 0.000004f,
+//	0.000103f, 1.0f - 0.336048f,
+//	0.335973f, 1.0f - 0.335903f,
+//	1.000023f, 1.0f - 0.000013f,
+//	0.667979f, 1.0f - 0.335851f,
+//	0.999958f, 1.0f - 0.336064f,
+//	0.667979f, 1.0f - 0.335851f,
+//	0.336024f, 1.0f - 0.671877f,
+//	0.667969f, 1.0f - 0.671889f,
+//	1.000023f, 1.0f - 0.000013f,
+//	0.668104f, 1.0f - 0.000013f,
+//	0.667979f, 1.0f - 0.335851f,
+//	0.000059f, 1.0f - 0.000004f,
+//	0.335973f, 1.0f - 0.335903f,
+//	0.336098f, 1.0f - 0.000071f,
+//	0.667979f, 1.0f - 0.335851f,
+//	0.335973f, 1.0f - 0.335903f,
+//	0.336024f, 1.0f - 0.671877f,
+//	1.000004f, 1.0f - 0.671847f,
+//	0.999958f, 1.0f - 0.336064f,
+//	0.667979f, 1.0f - 0.335851f,
+//	0.668104f, 1.0f - 0.000013f,
+//	0.335973f, 1.0f - 0.335903f,
+//	0.667979f, 1.0f - 0.335851f,
+//	0.335973f, 1.0f - 0.335903f,
+//	0.668104f, 1.0f - 0.000013f,
+//	0.336098f, 1.0f - 0.000071f,
+//	0.000103f, 1.0f - 0.336048f,
+//	0.000004f, 1.0f - 0.671870f,
+//	0.336024f, 1.0f - 0.671877f,
+//	0.000103f, 1.0f - 0.336048f,
+//	0.336024f, 1.0f - 0.671877f,
+//	0.335973f, 1.0f - 0.335903f,
+//	0.667969f, 1.0f - 0.671889f,
+//	1.000004f, 1.0f - 0.671847f,
+//	0.667979f, 1.0f - 0.335851f
+//};
 
 GLuint loadBMP_custom(const char * imagepath) {
 	// BMPファイルのヘッダから読み込まれるデータ
@@ -349,6 +354,7 @@ bool hit(double cube[47][4]) {
 			return true;
 		}
 	}
+	return false;
 }
 
 void decideCube(std::vector<glm::vec3> &vertices) {
@@ -402,7 +408,10 @@ void decideCube(std::vector<glm::vec3> &vertices) {
 		if (l == 48) { break; }
 	}
 
-	std::cout << k << "   " << l << "     " << (int)(vertices.size()) / 36 << "\n";
+	std::cout << "\n\n[decideCube]\n";
+	std::cout << "(k, l) = (" << k << ", " << l << ")\n";
+	std::cout << "vertices.size/36 = " << (int)(vertices.size()) / 36 << std::endl;
+	std::cout << std::endl;
 }
 
 void computeMatricesFromInputs(GLFWwindow* window) {
@@ -471,6 +480,7 @@ void computeMatricesFromInputs(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		position += direction * deltaTime * speed;
 		if (hit(cube) == true) {
+			playMusic(COLLISION, PLAY_INSTANCE);
 			position -= direction * deltaTime * speed;
 		}
 	}
@@ -478,6 +488,7 @@ void computeMatricesFromInputs(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		position -= direction * deltaTime * speed;
 		if (hit(cube) == true) {
+			playMusic(COLLISION, PLAY_INSTANCE);
 			position += direction * deltaTime * speed;
 		}
 	}
@@ -485,6 +496,7 @@ void computeMatricesFromInputs(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		position += right * deltaTime * speed;
 		if (hit(cube) == true) {
+			playMusic(COLLISION, PLAY_INSTANCE);
 			position -= right * deltaTime * speed;
 		}
 	}
@@ -492,6 +504,7 @@ void computeMatricesFromInputs(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		position -= right * deltaTime * speed;
 		if (hit(cube) == true) {
+			playMusic(COLLISION, PLAY_INSTANCE);
 			position += right * deltaTime * speed;
 		}
 	}
@@ -506,19 +519,27 @@ void computeMatricesFromInputs(GLFWwindow* window) {
 		FoV = initialFoV + 5 * 3.0f;
 	}
 
+	bool flag_music1 = true;
 	// Enterキーを押したらプレイ画面に遷移します
 	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
 		ModeSelect = 1;
+		if (flag_music1) {
+			flag_music1 = false;
+			std::cout << "ENTER\n";
+			playMusic(START1, PAUSE);
+			//playMusic(MAIN1, PLAY_LOOP);
+			playMusic(MAIN2, PLAY_LOOP);
+		}
 	}
-
+	
 	// 射影行列：視野45&deg;、4:3比、描画範囲0.1単位100単位
 	ProjectionM = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);
 	//ProjectionM = glm::perspective(glm::radians(initialFoV), 4.0f / 3.0f, 0.1f, 100.0f);
 	// カメラ行列
 	ViewM = glm::lookAt(
-		position,           // カメラの位置
-		position + direction, // 目標地点
-		up                  // 上方向 (0,-1,0にセットすると上下逆さまになります。)
+		position,				// カメラの位置
+		position + direction,	// 目標地点
+		up						// 上方向 (0,-1,0にセットすると上下逆さまになります。)
 	);
 
 }
@@ -559,12 +580,13 @@ bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vec
 	errno_t error;
 	error = fopen_s(&file, path, "r");
 	char lineHeader[2048];
+	bool dbg = false;					//trueにすると, アルファベットがたくさん出てくるデバッグが開始される
 	while (1) {
 
 		// 行の最初の文字列を読み込みます。
 		int res = fscanf_s(file, "%s", lineHeader, _countof(lineHeader));
 		if (res == EOF) {
-			printf("b");
+			if(dbg) printf("b");
 			// 各三角形の各頂点
 			for (unsigned int i = 0; i < vertexIndices.size(); i++) {
 				unsigned int vertexIndexa = vertexIndices[i];
@@ -573,7 +595,7 @@ bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vec
 				ver++;
 				//std::cout << vertexIndex;
 			}
-			printf("v");
+			if (dbg) printf("v");
 
 			for (unsigned int i = 0; i < uvIndices.size(); i++) {
 				//for (unsigned int i = 0; i < 12; i++) {
@@ -583,13 +605,13 @@ bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vec
 				out_uvs.push_back(uv);
 			}
 
-			printf("u");
+			if (dbg) printf("u");
 			for (unsigned int i = 0; i < normalIndices.size(); i++) {
 				unsigned int normalIndexa = normalIndices[i];
 				glm::vec3 normal = temp_normals[normalIndexa - 1];
 				out_normals.push_back(normal);
 			}
-			printf("a");
+			if (dbg) printf("a");
 			break; // EOF = End Of File. ループを終了します。
 		}
 		// そうでなければlineHeaderをパースします。
@@ -598,22 +620,22 @@ bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vec
 			glm::vec3 vertex;
 			fscanf_s(file, "%f %f %fn", &vertex.x, &vertex.y, &vertex.z);
 			temp_vertices.push_back(vertex);
-			printf("v");
+			if (dbg) printf("v");
 		}
 		else if (strcmp(lineHeader, "vt") == 0) {
 			glm::vec2 uv;
 			fscanf_s(file, "%f %fn", &uv.x, &uv.y);
 			temp_uvs.push_back(uv);
-			printf("vt");
+			if (dbg) printf("vt");
 		}
 		else if (strcmp(lineHeader, "vn") == 0) {
 			glm::vec3 normal;
 			fscanf_s(file, "%f %f %fn", &normal.x, &normal.y, &normal.z);
 			temp_normals.push_back(normal);
-			printf("vn");
+			if (dbg) printf("vn");
 		}
 		else if (strcmp(lineHeader, "f") == 0) {
-			printf("f");
+			if (dbg) printf("f");
 			std::string vertex1, vertex2, vertex3;
 			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
 			int matches = fscanf_s(file, "%d/%d/%d %d/%d/%d %d/%d/%dn", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
@@ -622,7 +644,7 @@ bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vec
 				printf("File can't be read by our simple parser : ( Try exporting with other optionsn");
 				return false;
 			}
-			printf("o");
+			if (dbg) printf("o");
 			vertexIndices.push_back(vertexIndex[0]);
 			vertexIndices.push_back(vertexIndex[1]);
 			vertexIndices.push_back(vertexIndex[2]);
@@ -632,7 +654,7 @@ bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vec
 			normalIndices.push_back(normalIndex[0]);
 			normalIndices.push_back(normalIndex[1]);
 			normalIndices.push_back(normalIndex[2]);
-			printf("e");
+			if (dbg) printf("e");
 		}
 
 
@@ -728,7 +750,7 @@ void prosessingOfOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& ver
 	glGenBuffers(1, vertexbuffer);									// バッファを1つ作り、vertexbufferに結果IDを入れます。
 	glBindBuffer(GL_ARRAY_BUFFER, *vertexbuffer);					// 次のコマンドは'vertexbuffer'バッファについてです。
 	if (!loadOBJ(OBJFile.c_str(), vertices, uvs, normals, *ver)) {	// もしobjファイルを読み込めなかったら
-		printf("[ERROR] No File of %s\n", OBJFile);					// エラー文を返す
+		printf("[ERROR] No File of %s\n", OBJFile.c_str());					// エラー文を返す
 	}
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
@@ -769,6 +791,119 @@ void prosessingOfOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& ver
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 }
 
+void playMusic(int file_idx, int command) {
+	if (file_idx == START1) {
+		if (command == PLAY_LOOP) {
+			if (!PlaySound(TEXT("BGM/START1.wav"), NULL, SND_FILENAME | SND_LOOP | SND_ASYNC)) {
+				std::cout << "再生できません" << std::endl;
+			}
+		}
+		if(command == PAUSE){
+			if (!PlaySound(TEXT("BGM/START1.wav"), NULL, SND_FILENAME | SND_PURGE | SND_ASYNC)) {
+				std::cout << "一時停止できません" << std::endl;
+			}
+		}
+	}
+	if (file_idx == MAIN1) {
+		if (command == PLAY_LOOP) {
+			if (!PlaySound(TEXT("BGM/MAIN1.wav"), NULL, SND_FILENAME | SND_LOOP | SND_ASYNC)) {
+				std::cout << "再生できません" << std::endl;
+			}
+		}
+		if (command == PAUSE) {
+			if (!PlaySound(TEXT("BGM/MAIN1.wav"), NULL, SND_FILENAME | SND_PURGE | SND_ASYNC)) {
+				std::cout << "一時停止できません" << std::endl;
+			}
+		}
+	}
+	if (file_idx == MAIN2) {
+		if (command == PLAY_LOOP) {
+			if (!PlaySound(TEXT("BGM/MAIN2.wav"), NULL, SND_FILENAME | SND_LOOP | SND_ASYNC)) {
+				std::cout << "再生できません" << std::endl;
+			}
+		}
+		if (command == PAUSE) {
+			if (!PlaySound(TEXT("BGM/MAIN2.wav"), NULL, SND_FILENAME | SND_PURGE | SND_ASYNC)) {
+				std::cout << "一時停止できません" << std::endl;
+			}
+		}
+	}
+	if (file_idx == ALL) {
+		if (command == PAUSE) {
+			if (!PlaySound(NULL, NULL, SND_PURGE | SND_ASYNC)) {
+				std::cout << "一時停止できません" << std::endl;
+			}
+		}
+	}
+	if (file_idx == COLLISION) {
+		if (command == PLAY_INSTANCE) {
+			mciSendCommand(open1.wDeviceID, MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&play1);
+			//mciSendCommand(open1.wDeviceID, MCI_STOP, MCI_NOTIFY, (DWORD_PTR)&play1);
+		}
+		//if (command == PAUSE) {
+		//	mciSendCommand(open1.wDeviceID, MCI_PAUSE, MCI_NOTIFY, (DWORD_PTR)&play1);
+		//}
+	}
+	if (file_idx == GET_ITEM) {
+		if (command == PLAY_INSTANCE) {
+			mciSendCommand(open2.wDeviceID, MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&play2);
+			//mciSendCommand(open2.wDeviceID, MCI_STOP, MCI_NOTIFY, (DWORD_PTR)&play2);
+		}
+		//if (command == PAUSE) {
+		//	mciSendCommand(open2.wDeviceID, MCI_PAUSE, MCI_NOTIFY, (DWORD_PTR)&play2);
+		//}
+	}
+}
+
+void InitMusic() {
+
+	//char buf[1024];
+
+	open1.lpstrDeviceType = (LPWSTR)MCI_DEVTYPE_WAVEFORM_AUDIO;
+	open1.lpstrElementName = TEXT("SE/collision.wav");
+	open2.lpstrDeviceType = (LPWSTR)MCI_DEVTYPE_WAVEFORM_AUDIO;
+	open2.lpstrElementName = TEXT("SE/get_item.wav");
+
+	char szCommand[256];
+	mciSendString((LPTSTR)szCommand, 0, 0, 0);
+
+	mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE | MCI_OPEN_TYPE_ID | MCI_OPEN_ELEMENT, (DWORD_PTR)&open1);
+	mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE | MCI_OPEN_TYPE_ID | MCI_OPEN_ELEMENT, (DWORD_PTR)&open2);
+
+	//mciSendCommand(open.wDeviceID, MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&play);
+
+	//エラーなら0以外が返る
+	//if (result) {
+	//	//エラー取得
+	//	mciGetErrorString(result, (LPWSTR)buf, sizeof(buf));
+	//	MSG(buf);
+	//	PostQuitMessage(0);
+	//}
+
+	//mp3再生の場合
+	//open2.lpstrDeviceType = TEXT("MPEGVideo");
+	//open2.lpstrElementName = TEXT("SE/music_sample2.mp3");
+	//result = mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE | MCI_OPEN_ELEMENT, (DWORD_PTR)&open2);
+
+	//エラーなら0以外が返る
+	//if (result) {
+	//	//エラー取得
+	//	mciGetErrorString(result, (LPWSTR)buf, sizeof(buf));
+	//	MSG(buf);
+	//	PostQuitMessage(0);
+	//}
+
+	play1.dwCallback = (DWORD)hwnd;
+	play2.dwCallback = (DWORD)hwnd;
+	//play2.dwCallback = (DWORD)hwnd;
+	//play3.dwCallback = (DWORD)hwnd;
+}
+
+void closeMusic() {
+	playMusic(ALL, PAUSE);
+	mciSendCommand(open1.wDeviceID, MCI_CLOSE, 0, 0);
+	mciSendCommand(open2.wDeviceID, MCI_CLOSE, 0, 0);
+}
 
 int main() {
 
@@ -778,7 +913,7 @@ int main() {
 	}
 
 	// ウィンドウ生成
-	GLFWwindow* window = glfwCreateWindow(1280, 640, "OpenGL Simple", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1920, 1080, "OpenGL Simple", NULL, NULL);
 
 	if (window == NULL) {
 		fprintf(stderr, "GLFWウィンドウのオープンに失敗しました。 もしIntelのGPUならば, 3.3に対応していません。チュートリアルのバージョン2.1を試してください。n");
@@ -804,211 +939,6 @@ int main() {
 		return -1;
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*
-		int ver = 0, ver2 = 0, ver3 = 0;
-
-		// これが頂点バッファを指し示すものとなります。
-		GLuint vertexbuffer;
-		// バッファを1つ作り、vertexbufferに結果IDを入れます。
-		glGenBuffers(1, &vertexbuffer);
-		// 次のコマンドは'vertexbuffer'バッファについてです。
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-
-		// .objファイルを読み込みます。
-		std::vector<glm::vec3> vertices;
-		std::vector<glm::vec3>  normals; // すぐには使いません。
-		std::vector<glm::vec2>  uvs;
-		//bool res = loadOBJ("cubetex.obj", vertices, uvs, normals,ver);
-		bool res = loadOBJ("Map01uv.obj", vertices, uvs, normals, ver);
-		//bool res = loadOBJ("MapBottomuv.obj", vertices, uvs, normals, ver);
-		//bool res = loadOBJnoUV("Map01_wall.obj", vertices, normals, ver);
-		//bool res = loadOBJnoUV("title.obj", vertices, normals, ver);
-		//bool res = loadOBJnoUV("cubetex.obj", vertices, normals,ver);
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-
-		// これがUVバッファを指し示すものとなります。
-		GLuint uvbuffer;
-		// バッファを1つ作り、uvbufferに結果IDを入れます。
-		glGenBuffers(1, &uvbuffer);
-		// 次のコマンドは'uvbuffer'バッファについてです。
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-
-
-		//GLuint colorbuffer;
-		//glGenBuffers(1, &colorbuffer);
-		//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-		//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-
-
-		// これが頂点バッファを指し示すものとなります。
-		GLuint vertexbuffer2;
-		// バッファを1つ作り、vertexbufferに結果IDを入れます。
-		glGenBuffers(1, &vertexbuffer2);
-		// 次のコマンドは'vertexbuffer'バッファについてです。
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-
-		// .objファイルを読み込みます。
-		std::vector<glm::vec3> vertices2;
-		std::vector<glm::vec3>  normals2; // すぐには使いません。
-		std::vector<glm::vec2>  uvs2;
-		//bool res2 = loadOBJ("MapBottomuv.obj", vertices2, uvs2, normals2, ver2);
-		bool res2 = loadOBJ("Map01Bottomuv.obj", vertices2, uvs2, normals2, ver2);
-		//bool res2 = loadOBJnoUV("ball.obj", vertices2, normals2, ver2);
-		//bool res2 = loadOBJnoUV("title.obj", vertices2, normals2, ver2);
-		//bool res2 = loadOBJnoUV("kantan1.obj", vertices2, normals2,ver2);
-		glBufferData(GL_ARRAY_BUFFER, vertices2.size() * sizeof(glm::vec3), &vertices2[0], GL_STATIC_DRAW);
-
-		// これがUVバッファを指し示すものとなります。
-		GLuint uvbuffer2;
-		// バッファを1つ作り、uvbufferに結果IDを入れます。
-		glGenBuffers(1, &uvbuffer2);
-		// 次のコマンドは'uvbuffer2'バッファについてです。
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer2);
-		glBufferData(GL_ARRAY_BUFFER, uvs2.size() * sizeof(glm::vec2), &uvs2[0], GL_STATIC_DRAW);
-
-
-		//GLuint colorbuffer2;
-		//glGenBuffers(1, &colorbuffer2);
-		//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer2);
-		//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-
-
-		// これが頂点バッファを指し示すものとなります。
-		GLuint vertexbuffer3;
-		// バッファを1つ作り、vertexbufferに結果IDを入れます。
-		glGenBuffers(1, &vertexbuffer3);
-		// 次のコマンドは'vertexbuffer'バッファについてです。
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
-
-		// .objファイルを読み込みます。
-		std::vector<glm::vec3> vertices3;
-		std::vector<glm::vec3>  normals3; // すぐには使いません。
-		std::vector<glm::vec2>  uvs3;
-		bool res3 = loadOBJ("itemsample.obj", vertices3, uvs3, normals3, ver3);
-		//bool res3 = loadOBJ("cubetex.obj", vertices3, uvs3, normals3, ver3);
-		//bool res3 = loadOBJnoUV("Map01_bottom.obj", vertices3, normals3, ver3);
-		glBufferData(GL_ARRAY_BUFFER, vertices3.size() * sizeof(glm::vec3), &vertices3[0], GL_STATIC_DRAW);
-
-
-		// これがUVバッファを指し示すものとなります。
-		GLuint uvbuffer3;
-		// バッファを1つ作り、uvbuffer3に結果IDを入れます。
-		glGenBuffers(1, &uvbuffer3);
-		// 次のコマンドは'uvbuffer3'バッファについてです。
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer3);
-		glBufferData(GL_ARRAY_BUFFER, uvs3.size() * sizeof(glm::vec2), &uvs3[0], GL_STATIC_DRAW);
-
-		//GLuint colorbuffer2;
-		//glGenBuffers(1, &colorbuffer2);
-		//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer2);
-		//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-
-
-
-
-		GLuint VertexArrayID;
-		glGenVertexArrays(1, &VertexArrayID);
-		glBindVertexArray(VertexArrayID);
-
-		// 最初の属性バッファ：頂点
-
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glVertexAttribPointer(
-			0,                  // 属性0：0に特に理由はありません。しかし、シェーダ内のlayoutとあわせないといけません。
-			3,                  // サイズ
-			GL_FLOAT,           // タイプ
-			GL_FALSE,           // 正規化？
-			0,                  // ストライド
-			(void*)0            // 配列バッファオフセット
-		);
-
-
-		// 2nd attribute buffer : colors
-		glEnableVertexAttribArray(1);
-		//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glVertexAttribPointer(
-			1,                                // 属性。1という数字に意味はありません。ただしシェーダのlayoutとあわせる必要があります。
-			2,                                // サイズ
-			GL_FLOAT,                         // タイプ
-			GL_FALSE,                         // 正規化？
-			0,                                // ストライド
-			(void*)0                          // 配列バッファオフセット
-		);
-
-
-		GLuint VertexArrayID2;
-		glGenVertexArrays(1, &VertexArrayID2);
-		glBindVertexArray(VertexArrayID2);
-
-		// 最初の属性バッファ：頂点
-
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-		glVertexAttribPointer(
-			0,                  // 属性0：0に特に理由はありません。しかし、シェーダ内のlayoutとあわせないといけません。
-			3,                  // サイズ
-			GL_FLOAT,           // タイプ
-			GL_FALSE,           // 正規化？
-			0,                  // ストライド
-			(void*)0            // 配列バッファオフセット
-		);
-
-
-		// 2nd attribute buffer : colors
-		glEnableVertexAttribArray(1);
-		//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer2);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer2);
-		glVertexAttribPointer(
-			1,                                // 属性。1という数字に意味はありません。ただしシェーダのlayoutとあわせる必要があります。
-			2,                                // サイズ
-			GL_FLOAT,                         // タイプ
-			GL_FALSE,                         // 正規化？
-			0,                                // ストライド
-			(void*)0                          // 配列バッファオフセット
-		);
-
-		GLuint VertexArrayID3;
-		glGenVertexArrays(1, &VertexArrayID3);
-		glBindVertexArray(VertexArrayID3);
-
-		// 最初の属性バッファ：頂点
-
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
-		glVertexAttribPointer(
-			0,                  // 属性0：0に特に理由はありません。しかし、シェーダ内のlayoutとあわせないといけません。
-			3,                  // サイズ
-			GL_FLOAT,           // タイプ
-			GL_FALSE,           // 正規化？
-			0,                  // ストライド
-			(void*)0            // 配列バッファオフセット
-		);
-
-
-		// 2nd attribute buffer : colors
-		glEnableVertexAttribArray(1);
-		//glBindBuffer(GL_ARRAY_BUFFER, colorbuffer3);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer3);
-		glVertexAttribPointer(
-			1,                                // 属性。1という数字に意味はありません。ただしシェーダのlayoutとあわせる必要があります。
-			2,                                // サイズ
-			GL_FLOAT,                         // タイプ
-			GL_FALSE,                         // 正規化？
-			0,                                // ストライド
-			(void*)0                          // 配列バッファオフセット
-		);
-
-		// 頂点をOpenGLに渡します。
-
-		//glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-	*/
-	
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
 	//新しい部分. 上の処理をコンパクトにした.
 	// #define N 5 が21行目に定義されています. .obj(OBJFile) と.bmp(Texture) を増やすときはNの値も1増やしてください. 
 
@@ -1038,8 +968,14 @@ int main() {
 	Texture[5] = loadBMP_custom("enter.bmp");
 	Texture[6] = loadBMP_custom("result.bmp");
 
-
-
+	std::string filename1 = "BGM/music_sample1.wav";
+	std::string filename2 = "BGM/music_sample2.mp3";
+	std::string filename3 = "BGM/music_sample3.wav";
+	
+	playMusic(START1, PLAY_LOOP);
+	InitMusic();
+	
+	
 	for (int i = 0; i < N; i++) {
 		//コメントアウトした 722行目 ～ 925行目の処理をまとめた関数
 		prosessingOfOBJ(&ver[i], &vertexbuffer[i], vertices[i], normals[i], uvs[i], OBJFile[i], &uvbuffer[i], &VertexArrayID[i]);
@@ -1108,6 +1044,7 @@ int main() {
 	int p = 0;
 	int flush = 0;		//1000に到達したら0に戻す
 	
+	
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == GL_FALSE) {
 		glClearColor(0.2f, 0.2f, 0.2f, 0.0f);					// おまじない
 		glEnable(GL_DEPTH_TEST);								// デプステストを有効にする
@@ -1133,7 +1070,7 @@ int main() {
 		if (ModeSelect == 0) {
 
 			flush++;
-			
+
 			//スタート画面を描画
 			glBindTexture(GL_TEXTURE_2D, Texture[3]);
 			glBindVertexArray(VertexArrayID[3]);
@@ -1148,7 +1085,7 @@ int main() {
 			//glDrawArrays(GL_TRIANGLES, 0, ver5); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
 			glDrawArrays(GL_TRIANGLES, 0, ver[4]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
 			
-			if (flush < 500) {
+			if (flush < 100) {
 				//Enter画面を張り付けるオブジェクトを描画
 				glBindTexture(GL_TEXTURE_2D, Texture[5]);
 				glBindVertexArray(VertexArrayID[5]);
@@ -1156,7 +1093,7 @@ int main() {
 				//glDrawArrays(GL_TRIANGLES, 0, ver4); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
 				glDrawArrays(GL_TRIANGLES, 0, ver[5]); // 12*3頂点は0から始まる -> 12枚の三角形 -> 6枚の正方形
 			}
-			else if (flush == 1000) {
+			else if (flush == 200) {
 				flush = 0;
 			}
 		}
@@ -1212,6 +1149,10 @@ int main() {
 	}
 
 	glfwTerminate();
+	
+	closeMusic();
+	//musicController(filename1.c_str(), command[6].c_str());
+	//system("pause");
 
 	return 0;
 
