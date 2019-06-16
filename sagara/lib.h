@@ -25,6 +25,9 @@
 #include <cstdio>
 //#include <GL/gl.h>
 #include <GL/freeglut.h>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <math.h>
 
 //#pragma comment(lib,"winmm.li")
 
@@ -35,6 +38,7 @@ using namespace glm;
 double lastTime;
 glm::mat4 ProjectionM;
 glm::mat4 ViewM;
+//glm::mat4 ModelM;
 
 //----------------------------------------------------
 // カメラ設定
@@ -85,8 +89,11 @@ glm::mat4 ViewMatrix;
 glm::mat4 ModelMatrix;
 glm::mat4 MVP;
 
+glm::mat4 ModelM[N];
+
 int p;
 int flush;
+double movecount;
 
 //keyboad
 float initialFoV;
@@ -252,6 +259,11 @@ bool loadOBJnoUV(const char * path, std::vector<glm::vec3>  & out_vertices, std:
 void prosessingOfOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
 void prosessingOfMoveOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
 void camerawork();
+glm::mat4 ObjRoll(int i);
+glm::mat4 ObjMove(int i);
+glm::mat4 getModelMatrix(int i);
+
+
 
 //6面ディスプレイ対応
 //<共通>
