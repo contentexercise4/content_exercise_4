@@ -7,6 +7,7 @@
 #include<fstream>
 #include<sstream>
 #include<string>
+#include <time.h>
 #include <algorithm>
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
@@ -15,32 +16,142 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include<GL/glut.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 //#include <vcclr.h>
-#include <Windows.h>
+//#include <Windows.h>
 #include <MMSystem.h>
+#include <cstdio>
+//#include <GL/gl.h>
+#include <GL/freeglut.h>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <math.h>
+
+using std::min;
+using std::max;
 
 //#pragma comment(lib,"winmm.li")
 
-#define N 7
+#define N 9
 
 using namespace glm;
+
+struct objFlags {
+	//--主人公のカメラの向きの移動フラグ--//
+	bool xposInc;		//x座標を増やす
+	bool xposDec;		//x座標を減らす
+	bool yposInc;		//y座標を増やす
+	bool yposDec;		//y座標を減らす
+
+	//--FoVの値変更のフラグ--//
+	bool FoVInc;		//FoV = initialFoV - 5 * 3.0f
+	bool FoVDec;		//FoV = initialFoV + 5 * 3.0f
+
+	//--主人公の位置座標変更のフラグ--//
+	bool keyUP;			//前進する
+	bool keyDOWN;		//後退する
+	bool keyRIGHT;		//右に進む
+	bool keyLEFT;		//左に進む
+
+	//--主人公の位置座標変更のフラグ--//
+	bool hitUP;			//前進したら壁に衝突した
+	bool hitDOWN;		//後退したら壁に衝突した
+	bool hitRIGHT;		//右に進んだら壁に衝突した
+	bool hitLEFT;		//左に進んだら壁に衝突した
+};
+
+objFlags objflag;
 
 double lastTime;
 glm::mat4 ProjectionM;
 glm::mat4 ViewM;
+//glm::mat4 ModelM;
+
+//----------------------------------------------------
+// カメラ設定
+//----------------------------------------------------
 // 水平角、-Z方向
 float horizontalAngle = 3.14f;
 // 鉛直角、0、水平線を眺めている
 float verticalAngle = 0.0f;
 // 位置
 glm::vec3 position = glm::vec3(0, 0, 5);
+
+// 方向：球面座標から直角座標に変換します。
+glm::vec3 direction(0, 0, 0);
+
+// 右ベクトル
+glm::vec3 right = glm::vec3(0, 0, 0);
+
+// 上ベクトル：右と前ベクトルに垂直
+glm::vec3 up;
+
+
 int vercount = 0;
 int vercount2 = 0;
 double cube[47][4] = { 0 }; //cube[47][x_max,x_min,z_max,z_min]
 int ModeSelect = 0;			//画面遷移に用いる. 0:スタート画面 1:プレイ画面 2:リザルト画面
+int screenWidth = 1960;
+int screenHeight = 1080;
+
+int ver[N] = { 0 };					// 関数 loadOBJnoUV() の中でインクリメントされる      
+GLuint vertexbuffer[N];				// これが頂点バッファを指し示すものとなります。
+std::vector<glm::vec3> vertices[N];	// .objファイルを読み込むのに使います
+std::vector<glm::vec3>  normals[N]; // すぐには使いません。
+std::vector<glm::vec2>  uvs[N];		// なんだろこれ.
+GLuint uvbuffer[N];					// これがUVバッファを指し示すものとなります。
+GLuint VertexArrayID[N];			// .objと.bmpとを結びつけるためのID
+
+std::string OBJFile[N];				//.objファイルを格納する
+GLuint Texture[N];					//.bmpファイルを読み込み, 関数 loadBMP_custom() の中でIDを割り当てられる. (すなわち, IDを持つ)
+
+GLuint MatrixID;
+GLuint programID;
+glm::mat4 Projection;
+glm::mat4 View;
+glm::mat4 Model;
+
+glm::mat4 ProjectionMatrix;
+glm::mat4 ViewMatrix;
+glm::mat4 ModelMatrix;
+glm::mat4 MVP;
+
+glm::mat4 ModelM[N];
+
+int p;
+int flush;
+double movecount;
+
+//keyboad
+float initialFoV;
+
+float speed; // 3 units / second
+float mouseSpeed;
+
+double currentTime;
+float deltaTime;
+float FoV;
+
+const int escKey = 27;
+
+//------------------------------------------------------------ ディスプレイ設定
+
+int  WindowPositionX = 0;         //生成するウィンドウ位置のX座標
+int  WindowPositionY = 0;         //生成するウィンドウ位置のY座標
+int  WindowWidth = 1960;           //生成するウィンドウの幅
+int  WindowHeight = 1080;            //生成するウィンドウの高さ
+char WindowTitle[] = "TMF"; //ウィンドウのタイトル
+
+//double ViewPointX = -300.0;
+//double ViewPointY = -160.0;
+//double ViewPointZ = 10.0;
+//
+//int MenuFlag = 0;
+
+
+
 
 // 3頂点を表す3つのベクトルの配列
 // 頂点。3つの連続する数字は3次元の頂点です。3つの連続する頂点は三角形を意味します。
@@ -169,12 +280,33 @@ GLuint loadTGA_glfw(const char * imagepath);
 GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_path);
 bool hit(double cube[47][4]);
 void decideCube(std::vector<glm::vec3> &vertices);
-void computeMatricesFromInputs(GLFWwindow* window);
+//void computeMatricesFromInputs(GLFWwindow* window);
 glm::mat4  getProjectionMatrix();
 glm::mat4 getViewMatrix();
 bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vector<glm::vec2>  & out_uvs, std::vector<glm::vec3>  & out_normals, int &ver);
 bool loadOBJnoUV(const char * path, std::vector<glm::vec3>  & out_vertices, std::vector<glm::vec3>  & out_normals, int &ver);
 void prosessingOfOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
+void prosessingOfMoveOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
+void camerawork();
+glm::mat4 ObjRoll(int i);
+glm::mat4 ObjMove(int i);
+glm::mat4 getModelMatrix(int i);
 
 
+
+//6面ディスプレイ対応
+//<共通>
+void Initialize(void); // 初期設定の関数
+void Display(void); // 描画の関数
+void Idle(); // アイドル時に呼び出される関数
+void Keyboard(unsigned char key, int x, int y); // キーボード入力時に呼び出される関数
+void special_key(int key, int x, int y); // 特殊キーの割り当て
+void KeyboadUP(unsigned char key, int x, int y);
+void special_keyUP(int key, int x, int y);
+void Reshape(int x, int y);
+
+void StartMode();
+void PlayMode();
+void moveOBJ();
+void InitObjFlag();
 #endif
