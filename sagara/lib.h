@@ -29,11 +29,40 @@
 #include <glm/gtx/quaternion.hpp>
 #include <math.h>
 
+using std::min;
+using std::max;
+
 //#pragma comment(lib,"winmm.li")
 
 #define N 9
 
 using namespace glm;
+
+struct objFlags {
+	//--主人公のカメラの向きの移動フラグ--//
+	bool xposInc;		//x座標を増やす
+	bool xposDec;		//x座標を減らす
+	bool yposInc;		//y座標を増やす
+	bool yposDec;		//y座標を減らす
+
+	//--FoVの値変更のフラグ--//
+	bool FoVInc;		//FoV = initialFoV - 5 * 3.0f
+	bool FoVDec;		//FoV = initialFoV + 5 * 3.0f
+
+	//--主人公の位置座標変更のフラグ--//
+	bool keyUP;			//前進する
+	bool keyDOWN;		//後退する
+	bool keyRIGHT;		//右に進む
+	bool keyLEFT;		//左に進む
+
+	//--主人公の位置座標変更のフラグ--//
+	bool hitUP;			//前進したら壁に衝突した
+	bool hitDOWN;		//後退したら壁に衝突した
+	bool hitRIGHT;		//右に進んだら壁に衝突した
+	bool hitLEFT;		//左に進んだら壁に衝突した
+};
+
+objFlags objflag;
 
 double lastTime;
 glm::mat4 ProjectionM;
@@ -104,6 +133,7 @@ float mouseSpeed;
 double currentTime;
 float deltaTime;
 float FoV;
+float difhA;
 
 const int escKey = 27;
 
@@ -111,7 +141,7 @@ const int escKey = 27;
 
 int  WindowPositionX = 0;         //生成するウィンドウ位置のX座標
 int  WindowPositionY = 0;         //生成するウィンドウ位置のY座標
-int  WindowWidth = 980;           //生成するウィンドウの幅
+int  WindowWidth = 1960;           //生成するウィンドウの幅
 int  WindowHeight = 1080;            //生成するウィンドウの高さ
 char WindowTitle[] = "TMF"; //ウィンドウのタイトル
 
@@ -259,9 +289,10 @@ bool loadOBJnoUV(const char * path, std::vector<glm::vec3>  & out_vertices, std:
 void prosessingOfOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
 void prosessingOfMoveOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
 void camerawork();
-glm::mat4 ObjRoll(int i);
+glm::mat4 ObjRoll(int i,double EulerAngle);
 glm::mat4 ObjMove(int i);
 glm::mat4 getModelMatrix(int i);
+glm::mat4 ObjMoveRollWithCamera(int i,glm::vec3 position,float hA,float vA) ;
 
 
 
@@ -272,8 +303,12 @@ void Display(void); // 描画の関数
 void Idle(); // アイドル時に呼び出される関数
 void Keyboard(unsigned char key, int x, int y); // キーボード入力時に呼び出される関数
 void special_key(int key, int x, int y); // 特殊キーの割り当て
+void KeyboadUP(unsigned char key, int x, int y);
+void special_keyUP(int key, int x, int y);
 void Reshape(int x, int y);
 
 void StartMode();
 void PlayMode();
+void moveOBJ();
+void InitObjFlag();
 #endif
