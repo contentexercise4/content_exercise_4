@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 
 	Initialize();						//初期設定の関数を呼び出す
 
-	initState();						//dimenco.hに関係している
+	//initState();						//dimenco.hに関係している
 	glutMainLoop();						//ループ関数. モード選択によってゲームへ面を遷移していく
 	return 0;
 }
@@ -297,7 +297,6 @@ void special_key(int key, int x, int y) {
 	//std::cout << "special key = " << key << std::endl;
 	//speed = 4.0f; // 3 units / second
 
-
 	if (key == GLUT_KEY_UP) {
 		//position += direction * deltaTime * speed;
 		if (hit(cube) == true) {
@@ -344,7 +343,8 @@ void special_key(int key, int x, int y) {
 			//position += right * deltaTime * speed;
 			objflag.hitLEFT = true;
 			objflag.keyLEFT = false;
-		}else{
+		}
+		else {
 			objflag.keyLEFT = true;
 			objflag.hitLEFT = false;
 		}
@@ -433,8 +433,9 @@ void moveOBJ() {
 	mouseSpeed = 0.05f;
 	int xpos = 512, ypos = 384;	//いまだに意味不明
 	FoV = 45.0f;				//なんか難しいやつ
-	speed = 2.0f;				//主人公の座標を動かす速さ
-	int changePos = 3;			//カメラの向きを動かす速さ
+	speed = 0.3f;               //主人公の座標を動かす速さ
+	hspeed = 1.0f;
+	int changePos = 2;			//カメラの向きを動かす速さ
 
 	//--カメラの向きの制御--//
 	if (objflag.xposInc) {
@@ -457,35 +458,47 @@ void moveOBJ() {
 	if (objflag.FoVDec) {
 		FoV = initialFoV + 5 * 3.0f;
 	}
+	/*
+	//--壁の衝突を制御--//
+	if (objflag.hitUP) {
+		position -= direction * deltaTime * hspeed;
+	}
+	if (objflag.hitDOWN) {
+		position += direction * deltaTime * hspeed;
+	}
+	if (objflag.hitRIGHT) {
+		position -= right * deltaTime * hspeed;
+	}
+	if (objflag.hitLEFT) {
+		position += right * deltaTime * hspeed;
+	}
+	*/
 
 	//--主人公の座標を制御--//
 	if (objflag.keyUP) {
 		position += direction * deltaTime * speed;
+		if (hit(cube) == true) {
+			position -= direction * deltaTime * speed;
+		}
 	}
 	if (objflag.keyDOWN) {
 		position -= direction * deltaTime * speed;
+		if (hit(cube) == true) {
+			position += direction * deltaTime * speed;
+		}
 	}
 	if (objflag.keyRIGHT) {
 		position += right * deltaTime * speed;
+		if (hit(cube) == true) {
+			position -= right * deltaTime * speed;
+		}
 	}
 	if (objflag.keyLEFT) {
 		position -= right * deltaTime * speed;
+		if (hit(cube) == true) {
+			position += right * deltaTime * speed;
+		}
 	}
-
-	//--壁の衝突を制御--//
-	if (objflag.hitUP) {
-		position -= direction * deltaTime * speed;
-	}
-	if (objflag.hitDOWN) {
-		position += direction * deltaTime * speed;
-	}
-	if (objflag.hitRIGHT) {
-		position -= right * deltaTime * speed;
-	}
-	if (objflag.hitLEFT) {
-		position += right * deltaTime * speed;
-	}
-
 	// 新たな方向を計算します。
 	horizontalAngle += mouseSpeed * deltaTime * float(1024 / 2 - xpos);
 	verticalAngle += mouseSpeed * deltaTime * float(768 / 2 - ypos);
@@ -647,6 +660,9 @@ void PlayMode() {
 	else {
 		std::cout << "SAFE\n";
 	}
+
+
+
 	//time_t cuTime;
 	//currentTime = glfwGetTime();
 	//deltaTime = float(currentTime - lastTime);
@@ -655,9 +671,14 @@ void PlayMode() {
 	//deltaTime = float(cuTime - laTime);
 	deltaTime = 0.016666;
 	//laTime = cuTime;
+
 	//動かすときに使ってる(仮)
+
 	movecount += 0.001;
 	moveOBJ();
+
+
+
 	// シェーダを使う
 
 	//glUseProgram(programID);
@@ -1584,9 +1605,9 @@ void InitMusic() {
 
 	sound_check = 0;
 
-	open1.lpstrDeviceType = (LPCSTR)MCI_DEVTYPE_WAVEFORM_AUDIO;
+	open1.lpstrDeviceType = (LPCWSTR)MCI_DEVTYPE_WAVEFORM_AUDIO;
 	open1.lpstrElementName = TEXT("SE/collision.wav");
-	open2.lpstrDeviceType = (LPCSTR)MCI_DEVTYPE_WAVEFORM_AUDIO;
+	open2.lpstrDeviceType = (LPCWSTR)MCI_DEVTYPE_WAVEFORM_AUDIO;
 	open2.lpstrElementName = TEXT("SE/get_item.wav");
 
 	char szCommand[256];
