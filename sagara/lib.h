@@ -34,7 +34,7 @@ using std::max;
 
 //#pragma comment(lib,"winmm.li")
 
-#define N 9
+#define N 10
 
 using namespace glm;
 
