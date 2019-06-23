@@ -3,6 +3,7 @@
 #define MUSIC_CONTROLLER_H
 
 #define MSG(m) { MessageBoxA(NULL,m,NULL,MB_OK); }
+#include "alut.h"
 
 HWND hwnd;			//ウィンドウハンドル
 HINSTANCE hinst;	//インスタンスハンドル
@@ -11,6 +12,7 @@ HINSTANCE hinst;	//インスタンスハンドル
 
 static MCI_OPEN_PARMS open1, open2, open3;
 static MCI_PLAY_PARMS play1, play2, play3;
+int sound_check;
 
 enum BGM_IDX {				//BGMの大文字ファイル名を数字対応させた
 	MAIN1   = 0,
@@ -35,10 +37,35 @@ enum COMMAND {				//playMusic() の2つ目の引数
 	CLOSE = 6,
 };
 
+//---SE---//
+ALuint seCollisionWall;		//壁に衝突するSE
+ALuint seCollisionEnemy;	//敵に衝突するSE
+ALuint seGetItem;			//アイテムを取得するSE
+
+//---BGM---//
+ALuint bgmStart;			//スタート画面のBGM
+ALuint bgmPlay;				//プレイ画面のBGM
+
+//---souce SE---//
+ALuint sseCollisionWall;	//壁に衝突するsSE
+ALuint sseCollisionEnemy;	//敵に衝突するsSE
+ALuint sseGetItem;			//アイテムを取得するsSE
+
+//---souce BGM---//
+ALuint sbgmStart;			//スタート画面のsBGM
+ALuint sbgmPlay;			//プレイ画面のsBGM
+
+int countCollisionWall = 0;	//壁に衝突時のSEを連座奥再生しないように制御する
+int initCountCollision = 300;	//countがこの値を超えたら0に初期化する
+
+
 //void musicController(const char* filename, const char* command);
 void playMusic(int file_idx, int commnad);	//BGM, SEの再生を直感的に行うための関数
 void InitMusic();							//SEの初期化
 void closeMusic();							//すべてのmusicを閉じる
+void soundPlay(ALuint buf, ALuint *source, bool loop);
+void soundStop(ALuint *source);
+bool chackDoubleSpecialKeyPush();
 
 
 //https://bituse.info/winapi/35

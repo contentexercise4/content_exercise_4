@@ -88,12 +88,13 @@ glm::vec3 right = glm::vec3(0, 0, 0);
 // 上ベクトル：右と前ベクトルに垂直
 glm::vec3 up;
 
+double rot = 0;
 
 int vercount = 0;
 int vercount2 = 0;
 double cube[47][4] = { 0 }; //cube[47][x_max,x_min,z_max,z_min]
 int ModeSelect = 0;			//画面遷移に用いる. 0:スタート画面 1:プレイ画面 2:リザルト画面
-int screenWidth = 1960;
+int screenWidth = 960;
 int screenHeight = 1080;
 
 int ver[N] = { 0 };					// 関数 loadOBJnoUV() の中でインクリメントされる      
@@ -133,16 +134,17 @@ float mouseSpeed;
 double currentTime;
 float deltaTime;
 float FoV;
+float hspeed;
 
 const int escKey = 27;
 
 //------------------------------------------------------------ ディスプレイ設定
 
-int  WindowPositionX = 0;         //生成するウィンドウ位置のX座標
-int  WindowPositionY = 0;         //生成するウィンドウ位置のY座標
-int  WindowWidth = 1960;           //生成するウィンドウの幅
-int  WindowHeight = 1080;            //生成するウィンドウの高さ
-char WindowTitle[] = "TMF"; //ウィンドウのタイトル
+int  WindowPositionX = 6;			//生成するウィンドウ位置のX座標
+int  WindowPositionY = 0;			//生成するウィンドウ位置のY座標
+int  WindowWidth = 1960;			//生成するウィンドウの幅
+int  WindowHeight = 1080;           //生成するウィンドウの高さ
+char WindowTitle[] = "TMF";			//ウィンドウのタイトル
 
 //double ViewPointX = -300.0;
 //double ViewPointY = -160.0;
@@ -288,9 +290,10 @@ bool loadOBJnoUV(const char * path, std::vector<glm::vec3>  & out_vertices, std:
 void prosessingOfOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
 void prosessingOfMoveOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
 void camerawork();
-glm::mat4 ObjRoll(int i);
+glm::mat4 ObjRoll(int i, double RadianAngle);
 glm::mat4 ObjMove(int i);
 glm::mat4 getModelMatrix(int i);
+glm::mat4 ObjMoveRollWithCamera(int i, glm::vec3 position, float hA, float vA);
 
 
 
@@ -304,6 +307,7 @@ void special_key(int key, int x, int y); // 特殊キーの割り当て
 void KeyboadUP(unsigned char key, int x, int y);
 void special_keyUP(int key, int x, int y);
 void Reshape(int x, int y);
+void initState();						//dimenco.hに関係している
 
 void StartMode();
 void PlayMode();
