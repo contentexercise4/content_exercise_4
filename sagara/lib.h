@@ -88,6 +88,7 @@ glm::vec3 right = glm::vec3(0, 0, 0);
 // 上ベクトル：右と前ベクトルに垂直
 glm::vec3 up;
 
+double rot=0;
 
 int vercount = 0;
 int vercount2 = 0;
@@ -139,7 +140,7 @@ const int escKey = 27;
 
 //------------------------------------------------------------ ディスプレイ設定
 
-int  WindowPositionX = 0;         //生成するウィンドウ位置のX座標
+int  WindowPositionX = 6;         //生成するウィンドウ位置のX座標
 int  WindowPositionY = 0;         //生成するウィンドウ位置のY座標
 int  WindowWidth = 1960;           //生成するウィンドウの幅
 int  WindowHeight = 1080;            //生成するウィンドウの高さ
@@ -306,6 +307,7 @@ void special_key(int key, int x, int y); // 特殊キーの割り当て
 void KeyboadUP(unsigned char key, int x, int y);
 void special_keyUP(int key, int x, int y);
 void Reshape(int x, int y);
+void initState();						//dimenco.hに関係している
 
 void StartMode();
 void PlayMode();
