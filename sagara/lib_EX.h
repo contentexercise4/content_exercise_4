@@ -32,7 +32,7 @@ using std::min;
 using std::max;
 
 //#pragma comment(lib,"winmm.li")
-#define N 9
+#define N 10
 
 using namespace glm;
 
@@ -93,10 +93,10 @@ float horizontalAngle = 3.14f;
 // 鉛直角、0、水平線を眺めている
 float verticalAngle = 0.0f;
 // 位置
-glm::vec3 position = glm::vec3(4, 1, 2);
+glm::vec3 position = glm::vec3(0, 0, 0);
 
 // 方向：球面座標から直角座標に変換します。
-glm::vec3 direction(1, 1, 1);
+glm::vec3 direction(0, 0, 0);
 
 // 右ベクトル
 glm::vec3 right_vec3 = glm::vec3(0, 0, 0);
@@ -120,9 +120,6 @@ std::vector<glm::vec3>  normals[N]; // すぐには使いません。
 std::vector<glm::vec2>  uvs[N];		// なんだろこれ.
 GLuint uvbuffer[N];					// これがUVバッファを指し示すものとなります。
 GLuint VertexArrayID[N];			// .objと.bmpとを結びつけるためのID
-
-//std::string OBJFile[N];				//.objファイルを格納する
-//GLuint Texture[N];					//.bmpファイルを読み込み, 関数 loadBMP_custom() の中でIDを割り当てられる. (すなわち, IDを持つ)
 
 GLuint MatrixID;
 GLuint programID;
@@ -310,6 +307,7 @@ glm::mat4 ObjRoll(int i, double RadianAngle);
 glm::mat4 ObjMove(int i);
 glm::mat4 getModelMatrix(int i);
 glm::mat4 ObjMoveRollWithCamera(int i, glm::vec3 position, float hA, float vA);
+void ObjMoveRoll_Camera(float hA, float vA);
 
 
 

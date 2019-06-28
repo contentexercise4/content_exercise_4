@@ -44,6 +44,8 @@ using namespace std;
 //　disable Warning C4996
 #pragma warning(disable : 4996)
 
+bool playflag = false;
+
 //////////////////////////////////////////////////////////////////////////
 // Functions
 //////////////////////////////////////////////////////////////////////////
@@ -1121,9 +1123,9 @@ void Initialize() {
 
 	InitObjFlag();
 	
-	OBJFile[0].LoadFile("obj/Map01uv.obj");
+	OBJFile[0].LoadFile("obj/MapSmall.obj");
 	OBJFile[1].LoadFile("obj/Map01Bottomuv.obj");
-	OBJFile[2].LoadFile("obj/itemsample.obj");
+	OBJFile[2].LoadFile("obj/time.obj");
 	OBJFile[3].LoadFile("obj/start.obj");
 	OBJFile[4].LoadFile("obj/title.obj");
 	OBJFile[5].LoadFile("obj/enter.obj");
@@ -1133,9 +1135,10 @@ void Initialize() {
 	//OBJFile[7].LoadFile("obj/lowpig.obj");
 	OBJFile[7].LoadFile("obj/lowpigO.obj");
 	OBJFile[8].LoadFile("obj/lowapple.obj");
+	OBJFile[9].LoadFile("obj/MapSmallCube.obj");
 
 
-	Texture[0].Load("bmp/texsample.bmp");
+	Texture[0].Load("bmp/stonewall.bmp");
 	Texture[1].Load("bmp/mapbottom.bmp");
 	Texture[2].Load("bmp/sampletex.bmp");
 	Texture[3].Load("bmp/start.bmp");
@@ -1147,9 +1150,11 @@ void Initialize() {
 	//Texture[7].Load("bmp/pigfbx1.bmp");
 	Texture[7].Load("bmp/lowpig.bmp");
 	Texture[8].Load("bmp/lowapple.bmp");
+	Texture[9].Load("bmp/sky.bmp");
 
+	//これいらんかも、初期化でいい
 	gluLookAt(
-		4, 1, 2, // ワールド空間でカメラは(4,3,3)にあります。
+		-5, 1, -12, // ワールド空間でカメラは(4,3,3)にあります。
 		//enepos_x2, enepos_y2, enepos_z2,    // 視界の調整(追加 6/12)
 		1, 1, 1,
 		0.0, 1.0, 0.0);                     // 視界の上方向のベクトルx,y,z
@@ -1158,9 +1163,11 @@ void Initialize() {
 	// 下でエスケープキーが押されるのを捉えるのを保証します。
 	//glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-	position.x = 4, position.y = 1, position.z = 2;
-	direction.x = -3, direction.y = 0, direction.z = -1;
-
+	position.x = -12, position.y = 1, position.z = -15.5;//カメラの位置
+	//position.x = 0, position.y = 0, position.z = 0;//カメラの位置
+	direction.x = 0, direction.y = 0, direction.z = 0;//何でもいい
+	horizontalAngle = 3.14f/2.0f;//カメラの向き
+	verticalAngle = 0.0f;
 	movecount = 0;
 	p = 0;
 	flush_cnt = 0;		//1000に到達したら0に戻す
@@ -1205,10 +1212,6 @@ void Display(void) {
 	//#endif
 	view3D();
 	//glLoadIdentity();
-
-	//陰影ON------------------------------------------
-	//glEnable(GL_LIGHTING);
-	//glEnable(GL_LIGHT1);   //光源1を利用
 
 	if (ModeSelect == 0) {
 		if (sound_check == 0) {
@@ -1585,7 +1588,6 @@ void moveOBJ() {
 	direction.y = sin(verticalAngle);
 	direction.z = cos(verticalAngle) * cos(horizontalAngle);
 
-
 	// 右ベクトル
 	right_vec3.x = sin(horizontalAngle - 3.14f / 2.0f);
 	right_vec3.y = 0;
@@ -1656,6 +1658,7 @@ void StartMode() {
 		//enepos_x2, enepos_y2, enepos_z2,    // 視界の調整(追加 6/12)
 		0.125, 0.08, 0,
 		0.0, 1.0, 0.0);                     // 視界の上方向のベクトルx,y,z
+		
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//#ifdef USE_DIMENCO_OPENGL_INTERFACE
@@ -1692,15 +1695,27 @@ void StartMode() {
 	}
 
 	// テクスチャマッピング有効化 (追加 bmp)
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	//　テクスチャをバインド (追加 bmp)
-	glBindTexture(GL_TEXTURE_2D, Texture[6].ID);
-	glPushMatrix();
-	OBJFile[6].Draw();
-	glPopMatrix();
+	//glBindTexture(GL_TEXTURE_2D, Texture[6].ID);
+	//glPushMatrix();
+	//OBJFile[6].Draw();
+	//glPopMatrix();
 }
 
 void PlayMode() {
+	/*
+	if (playflag == false) {
+		std::cout << "asdsn";
+		playflag = true;
+		gluLookAt(
+			-5, 1, -12, // ワールド空間でカメラは(4,3,3)にあります。
+			//enepos_x2, enepos_y2, enepos_z2,    // 視界の調整(追加 6/12)
+			1, 1, 1,
+			0.0, 1.0, 0.0);                     // 視界の上方向のベクトルx,y,z
+	}
+	*/
+
 	/*
 	gluLookAt(
 		4, 1, 2, // ワールド空間でカメラは(4,3,3)にあります。
@@ -1735,7 +1750,7 @@ void PlayMode() {
 //	glutSwapBuffers(); //glutInitDisplayMode(GLUT_DOUBLE)でダブルバッファリングを利用可
 //glfwPollEvents();
 
-
+	//壁
 	// テクスチャマッピング有効化 (追加 bmp)
 	glEnable(GL_TEXTURE_2D);
 	//　テクスチャをバインド (追加 bmp)
@@ -1744,6 +1759,7 @@ void PlayMode() {
 	OBJFile[0].Draw();
 	glPopMatrix();
 
+	//床
 	// テクスチャマッピング有効化 (追加 bmp)
 	glEnable(GL_TEXTURE_2D);
 	//　テクスチャをバインド (追加 bmp)
@@ -1752,14 +1768,19 @@ void PlayMode() {
 	OBJFile[1].Draw();
 	glPopMatrix();
 
+	//時間
 	// テクスチャマッピング有効化 (追加 bmp)
 	glEnable(GL_TEXTURE_2D);
 	//　テクスチャをバインド (追加 bmp)
 	glBindTexture(GL_TEXTURE_2D, Texture[2].ID);
 	glPushMatrix();
+	ObjMoveRoll_Camera(horizontalAngle, verticalAngle);
+	//glTranslatef(-11.0, 1.05, -15.6);
+	//glRotatef(90.0f,0.0f,1.0f,0.0f);
 	OBJFile[2].Draw();
 	glPopMatrix();
 
+	//pig
 	// テクスチャマッピング有効化 (追加 bmp)
 	glEnable(GL_TEXTURE_2D);
 	//　テクスチャをバインド (追加 bmp)
@@ -1769,6 +1790,7 @@ void PlayMode() {
 	OBJFile[7].Draw();
 	glPopMatrix();
 
+	//apple
 	// テクスチャマッピング有効化 (追加 bmp)
 	glEnable(GL_TEXTURE_2D);
 	//　テクスチャをバインド (追加 bmp)
@@ -1777,9 +1799,14 @@ void PlayMode() {
 	OBJFile[8].Draw();
 	glPopMatrix();
 
-
-
-
+	//sky
+	// テクスチャマッピング有効化 (追加 bmp)
+	glEnable(GL_TEXTURE_2D);
+	//　テクスチャをバインド (追加 bmp)
+	glBindTexture(GL_TEXTURE_2D, Texture[9].ID);
+	glPushMatrix();
+	OBJFile[9].Draw();
+	glPopMatrix();
 
 }
 
@@ -2478,7 +2505,7 @@ glm::mat4 ObjMove(int i) {
 	return movemat;
 
 }
-//ooo
+
 glm::mat4 ObjRoll(int i, double RadianAngle) {
 	//glBindBuffer(GL_ARRAY_BUFFER, *vertexbuffer);					// 次のコマンドは'vertexbuffer'バッファについてです。
 	//glLoadIdentity();
@@ -2551,7 +2578,6 @@ glm::mat4 ObjRoll(int i, double RadianAngle) {
 	return rollmat;
 }
 
-//ooo
 glm::mat4 ObjMoveRollWithCamera(int i, glm::vec3 position, float hA, float vA) {
 
 	//double x = movecount;
@@ -2562,6 +2588,7 @@ glm::mat4 ObjMoveRollWithCamera(int i, glm::vec3 position, float hA, float vA) {
 	x = position.x;
 	y = position.y;
 	z = position.z;
+
 
 	glm::mat4 movematrix;
 	glm::mat4 movemat;
@@ -2594,6 +2621,31 @@ glm::mat4 ObjMoveRollWithCamera(int i, glm::vec3 position, float hA, float vA) {
 
 	return movemat;
 
+}
+
+void ObjMoveRoll_Camera(float hA, float vA) {
+	double x, y, z;
+	float Ax, Az;
+	//glm::vec3(4, 1, 2);
+	x = position.x;
+	y = position.y;
+	z = position.z;
+
+	float pi = 3.1415;
+	float onedegree = pi / 180.0f; //1°のラジアン
+	float rolldegree = hA / onedegree;
+
+	Ax = 1.2*sin(hA + pi / 36.0);
+	Az = 1.2*cos(hA + pi / 36.0);
+
+	glTranslatef(x+Ax, y+0.15, z+Az);
+	glScalef(0.5f, 0.5f, 0.5f);
+	glRotatef(rolldegree, 0.0f, 1.0f, 0.0f);
+	std::cout << "x=" << x + Ax << ",y=" << y+0.05 << ",z=" << z + Az << std::endl;
+	//movemat = glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x + Ax, y, z + Az, 1);
+	//position.x = -12, position.y = 1, position.z = -15.5
+	//glTranslatef(-11.0, 1.05, -15.6);
+	//glRotatef(90.0f,0.0f,1.0f,0.0f);
 }
 
 void InitMusic() {
