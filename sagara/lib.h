@@ -2,6 +2,7 @@
 #ifndef LIB_H
 #define LIB_H
 
+
 #include<iostream>
 #include<vector>
 #include<fstream>
@@ -15,28 +16,40 @@
 #include <glm/gtx/transform.hpp> // <glm/glm.hpp>の後
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include<GL/glut.h>
-//#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 //#include <vcclr.h>
-//#include <Windows.h>
 #include <MMSystem.h>
 #include <cstdio>
 //#include <GL/gl.h>
 #include <GL/freeglut.h>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <math.h>
+#include <sys/stat.h>
 
 using std::min;
 using std::max;
 
 //#pragma comment(lib,"winmm.li")
-
-#define N 10
+#define N 39
 
 using namespace glm;
+
+//bmp(テクスチャ)読み込み
+#include "BMPLoader.h"
+//BMPImage::BMPImage();
+BMPImage Texture[N];
+
+//obj(3Dモデル)読み込み
+#include "OBJLoader.h"
+//OBJMESH::OBJMESH();
+OBJMESH OBJFile[N];
+//FPS計算
+//#include "FPS.h"
+//FPS *fps = new FPS(60); //秒間30フレーム(可変sleep)
+
 
 struct objFlags {
 	//--主人公のカメラの向きの移動フラグ--//
@@ -64,6 +77,10 @@ struct objFlags {
 
 objFlags objflag;
 
+//glm::mat4 Movemat= glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);;
+//time_t cuTime;
+//time_t laTime;
+
 double lastTime;
 glm::mat4 ProjectionM;
 glm::mat4 ViewM;
@@ -77,18 +94,18 @@ float horizontalAngle = 3.14f;
 // 鉛直角、0、水平線を眺めている
 float verticalAngle = 0.0f;
 // 位置
-glm::vec3 position = glm::vec3(0, 0, 5);
+glm::vec3 position = glm::vec3(0, 0, 0);
 
 // 方向：球面座標から直角座標に変換します。
 glm::vec3 direction(0, 0, 0);
 
 // 右ベクトル
-glm::vec3 right = glm::vec3(0, 0, 0);
+glm::vec3 right_vec3 = glm::vec3(0, 0, 0);
 
 // 上ベクトル：右と前ベクトルに垂直
 glm::vec3 up;
 
-double rot=0;
+double rot = 0;
 
 int vercount = 0;
 int vercount2 = 0;
@@ -96,6 +113,7 @@ double cube[47][4] = { 0 }; //cube[47][x_max,x_min,z_max,z_min]
 int ModeSelect = 0;			//画面遷移に用いる. 0:スタート画面 1:プレイ画面 2:リザルト画面
 int screenWidth = 1960;
 int screenHeight = 1080;
+
 
 int ver[N] = { 0 };					// 関数 loadOBJnoUV() の中でインクリメントされる      
 GLuint vertexbuffer[N];				// これが頂点バッファを指し示すものとなります。
@@ -105,8 +123,7 @@ std::vector<glm::vec2>  uvs[N];		// なんだろこれ.
 GLuint uvbuffer[N];					// これがUVバッファを指し示すものとなります。
 GLuint VertexArrayID[N];			// .objと.bmpとを結びつけるためのID
 
-std::string OBJFile[N];				//.objファイルを格納する
-GLuint Texture[N];					//.bmpファイルを読み込み, 関数 loadBMP_custom() の中でIDを割り当てられる. (すなわち, IDを持つ)
+std::string calc_OBJFile[N];		// 計算用の.objファイルを格納する
 
 GLuint MatrixID;
 GLuint programID;
@@ -122,7 +139,7 @@ glm::mat4 MVP;
 glm::mat4 ModelM[N];
 
 int p;
-int flush;
+int flush_cnt = 0;
 double movecount;
 
 //keyboad
@@ -134,17 +151,22 @@ float mouseSpeed;
 double currentTime;
 float deltaTime;
 float FoV;
-float difhA;
+float hspeed;
 
 const int escKey = 27;
 
-//------------------------------------------------------------ ディスプレイ設定
-
+//------------------------------------------------------------ 
+// ディスプレイ設定
+//------------------------------------------------------------ 
+//int  WindowPositionX = 600;			//生成するウィンドウ位置のX座標
+//int  WindowPositionY = 0;			//生成するウィンドウ位置のY座標
+//int  WindowWidth = 960;			//生成するウィンドウの幅
+//int  WindowHeight = 1080;           //生成するウィンドウの高さ
 int  WindowPositionX = 6;         //生成するウィンドウ位置のX座標
 int  WindowPositionY = 0;         //生成するウィンドウ位置のY座標
 int  WindowWidth = 1960;           //生成するウィンドウの幅
 int  WindowHeight = 1080;            //生成するウィンドウの高さ
-char WindowTitle[] = "TMF"; //ウィンドウのタイトル
+char WindowTitle[] = "TMF";			//ウィンドウのタイトル
 
 //double ViewPointX = -300.0;
 //double ViewPointY = -160.0;
@@ -287,13 +309,13 @@ glm::mat4  getProjectionMatrix();
 glm::mat4 getViewMatrix();
 bool loadOBJ(const char * path, std::vector<glm::vec3>  & out_vertices, std::vector<glm::vec2>  & out_uvs, std::vector<glm::vec3>  & out_normals, int &ver);
 bool loadOBJnoUV(const char * path, std::vector<glm::vec3>  & out_vertices, std::vector<glm::vec3>  & out_normals, int &ver);
-void prosessingOfOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
-void prosessingOfMoveOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
-void camerawork();
-glm::mat4 ObjRoll(int i,double EulerAngle);
+void prosessingOfOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string calc_OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
+void prosessingOfMoveOBJ(int *ver, GLuint *vertexbuffer, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals, std::vector<glm::vec2>& uvs, std::string calc_OBJFile, GLuint *uvbuffer, GLuint *VertexArrayID);
+glm::mat4 ObjRoll(int i, double RadianAngle);
 glm::mat4 ObjMove(int i);
 glm::mat4 getModelMatrix(int i);
-glm::mat4 ObjMoveRollWithCamera(int i,glm::vec3 position,float hA,float vA) ;
+glm::mat4 ObjMoveRollWithCamera(int i, glm::vec3 position, float hA, float vA);
+void ObjMoveRoll_Camera(float hA, float vA,int i);
 
 
 
@@ -308,9 +330,11 @@ void KeyboadUP(unsigned char key, int x, int y);
 void special_keyUP(int key, int x, int y);
 void Reshape(int x, int y);
 void initState();						//dimenco.hに関係している
+void view3D();
 
 void StartMode();
 void PlayMode();
 void moveOBJ();
 void InitObjFlag();
+
 #endif
