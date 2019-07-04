@@ -320,7 +320,6 @@ void ObjMoveRoll_Camera(float hA, float vA,int i);
 
 double pigx = 10;  //ブタの初期位置
 double pigz = 0;
-double disFromPig;  //ブタと自分との距離
 
 //6面ディスプレイ対応
 //<共通>
