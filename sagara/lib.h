@@ -170,6 +170,8 @@ int  WindowWidth = 1960;           //生成するウィンドウの幅
 int  WindowHeight = 1080;            //生成するウィンドウの高さ
 char WindowTitle[] = "TMF";			//ウィンドウのタイトル
 
+bool appleFlag[4];
+
 //double ViewPointX = -300.0;
 //double ViewPointY = -160.0;
 //double ViewPointZ = 10.0;
