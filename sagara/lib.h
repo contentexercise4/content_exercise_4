@@ -77,9 +77,11 @@ struct objFlags {
 
 objFlags objflag;
 
-//glm::mat4 Movemat= glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);;
-//time_t cuTime;
-//time_t laTime;
+//glm::mat4 Movemat= glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+time_t cuTime;
+time_t laTime;
+time_t faTime;
+double defTime;
 
 double lastTime;
 glm::mat4 ProjectionM;
@@ -303,6 +305,8 @@ GLuint loadBMP_custom(const char * imagepath);
 GLuint loadTGA_glfw(const char * imagepath);
 GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_path);
 bool hit(double cube[47][4]);
+bool objhit(double xmin, double xmax, double zmin, double zmax, double cube[47][4]);
+bool objhit2(double x, double z, double cube[47][4]);
 void decideCube(std::vector<glm::vec3> &vertices);
 //void computeMatricesFromInputs(GLFWwindow* window);
 glm::mat4  getProjectionMatrix();
@@ -316,7 +320,10 @@ glm::mat4 ObjMove(int i);
 glm::mat4 getModelMatrix(int i);
 glm::mat4 ObjMoveRollWithCamera(int i, glm::vec3 position, float hA, float vA);
 void ObjMoveRoll_Camera(float hA, float vA,int i);
+void PigRolling(double xspeed,double zspeed);
 
+double pigx = 10;  //ブタの初期位置
+double pigz = 0;
 
 
 //6面ディスプレイ対応
