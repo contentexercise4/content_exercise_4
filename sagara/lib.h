@@ -92,7 +92,7 @@ glm::mat4 ViewM;
 // カメラ設定
 //----------------------------------------------------
 // 水平角、-Z方向
-float horizontalAngle = 3.14f;
+float horizontalAngle = 180.0f;
 // 鉛直角、0、水平線を眺めている
 float verticalAngle = 0.0f;
 // 位置
@@ -111,7 +111,7 @@ double rot = 0;
 
 int vercount = 0;
 int vercount2 = 0;
-double cube[47][4] = { 0 }; //cube[47][x_max,x_min,z_max,z_min]
+double cube[29][4] = { 0 }; //cube[47][x_max,x_min,z_max,z_min]
 int ModeSelect = 0;			//画面遷移に用いる. 0:スタート画面 1:プレイ画面 2:リザルト画面
 int screenWidth = 1960;
 int screenHeight = 1080;
@@ -171,6 +171,8 @@ int  WindowHeight = 1080;            //生成するウィンドウの高さ
 char WindowTitle[] = "TMF";			//ウィンドウのタイトル
 
 bool appleFlag[4];
+int applecount = 0;
+
 
 //double ViewPointX = -300.0;
 //double ViewPointY = -160.0;
