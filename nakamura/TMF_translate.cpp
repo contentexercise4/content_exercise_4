@@ -974,9 +974,11 @@ void PlayMode() {
 	int obji = 0; int objj = 0;
 
 
-	double obj_speed = 0.002;  //objectのスピード
+	double obj_speed = 0.003;  //objectのスピード
 	double dif_x, dif_z;
 	double obj_xspeed, obj_zspeed;
+	double pigbox[4];
+
 
 	glTranslatef(pigx, -1.0, pigz);
 
@@ -988,11 +990,26 @@ void PlayMode() {
 		//std::cout << disFromPig << "\n";
 		if (disFromPig < 20) {
 
+			pigbox[0] = pigx - 1.0;
+			pigbox[1] = pigx + 1.0;
+			pigbox[2] = pigz - 1.0;
+			pigbox[3] = pigz + 1.0;
+
 			obj_xspeed = (double)(dif_x / disFromPig * obj_speed);
 			obj_zspeed = (double)(dif_z / disFromPig * obj_speed);
 
 			pigx += obj_xspeed;
+			//if (objhit(pigbox[0], pigbox[1], pigbox[2], pigbox[3], cube) == true) {
+			if (objhit2(pigx, pigz, cube)==true) {
+				pigx -= obj_xspeed;
+			}
+
 			pigz += obj_zspeed;
+				//if (objhit(pigbox[0], pigbox[1], pigbox[2], pigbox[3], cube) == true) {
+				if (objhit2(pigx, pigz, cube)==true){
+				pigz -= obj_zspeed;
+			}
+
 
 			/*for (int i = 0; i < vertices.size(); i++) {
 
@@ -1085,6 +1102,28 @@ bool hit(double cube[47][4]) {
 	for (int i = 0; i < 47; i++) {
 		if ((position.x < cube[i][0] && position.x > cube[i][1]) &&
 			(position.z < cube[i][2] && position.z > cube[i][3])) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool objhit(double xmin, double xmax, double zmin, double zmax, double cube[47][4]) {
+	for (int i = 0; i < 47; i++) {
+		if ((xmin < cube[i][0] && xmax > cube[i][1]) &&
+			(zmin < cube[i][2] && zmax > cube[i][3])) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool objhit2(double x, double z, double cube[47][4]) {
+	for (int i = 0; i < 47; i++) {
+		double x1 = x - 0.5, x2 = x + 1.6;
+		double z1 = z - 0.9, z2 = z + 0.8;
+		if ((x1 < cube[i][0] && x2 > cube[i][1]) &&
+			(z1 < cube[i][2] && z2 > cube[i][3])) {
 			return true;
 		}
 	}

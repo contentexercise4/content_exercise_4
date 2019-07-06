@@ -304,6 +304,8 @@ GLuint loadBMP_custom(const char * imagepath);
 GLuint loadTGA_glfw(const char * imagepath);
 GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_path);
 bool hit(double cube[47][4]);
+bool objhit(double xmin, double xmax, double zmin, double zmax, double cube[47][4]);
+bool objhit2(double x, double z, double cube[47][4]);
 void decideCube(std::vector<glm::vec3> &vertices);
 //void computeMatricesFromInputs(GLFWwindow* window);
 glm::mat4  getProjectionMatrix();
@@ -320,6 +322,7 @@ void ObjMoveRoll_Camera(float hA, float vA,int i);
 
 double pigx = 10;  //ブタの初期位置
 double pigz = 0;
+
 
 //6面ディスプレイ対応
 //<共通>
