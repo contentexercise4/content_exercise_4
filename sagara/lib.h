@@ -343,5 +343,6 @@ void StartMode();
 void PlayMode();
 void moveOBJ();
 void InitObjFlag();
+void ResultMode();
 
 #endif
