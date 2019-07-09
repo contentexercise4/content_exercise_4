@@ -78,3 +78,30 @@ ver2.4
 1085行目でブタの速度変更（obj_speed)
 333行目で上空から見下ろす視点にする(gluLookAt)
 lib.h 331-339 ブタの移動ポイント設定
+
+2019/07/09
+ver2.4.1
+・アイテムの取得音を実装
+・BGMをリザルト画面含めて遷移(バグあり)
+・GameReset()により主人公の位置が初期一に戻る. ブタは戻らない
+・6画面対応用の画面サイズやスピードと手元のPCで遊ぶ（開発テストする）用の画面サイズとスピードをenumのMYPC or DIMENCOで選択可能
+
+☆ブタの鳴き声を停止(999行目の decideVolumeOfPigCry() をコメントアウト)
+<理由>
+・アイテムの取得音が鳴らなくなる
+・画面遷移時のBGMにバグが生じる
+いずれも原因不明
+
+2019/07/09
+ver2.5
+PlayMode()内のオブジェクトの表示部を関数にまとめる
+具体的には
+void Wall();
+void Floor();
+void TimeLimit();
+void NumOfApple();
+void Pig();
+void DirectionOfPig();
+void Apple();
+void Sky();
+にまとめた.
