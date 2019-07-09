@@ -105,3 +105,43 @@ void DirectionOfPig();
 void Apple();
 void Sky();
 にまとめた.
+
+2019/07/09
+ver2.6
+[lib_ver2.6.h]
+☆ 難易度選択時に使用する enum DegreeOfDifficultyを追加
+lib.h内の宣言部を整理
+
+[TMF_ver2.6.cpp]
+☆ STRAT画面から難易度を選択可能となった. START画面で押せるキーは以下の通り
+E  : EASY
+N  : NORMAL
+H  : HARD
+F7 : 今まで通り(NORMAL)
+
+☆ void selectDegreeOfDifficulty(int dod)
+1157～1176行目
+難易度選択関数を追加. START画面で押されたキーに従って作動
+難易度は以下の通り
+EASY
+	ブタのスピード=0.003
+	ブタが追いかけてこない
+NORMAL
+	ブタのスピード=0.005
+	ブタが追いかけてくる
+HARD
+	ブタのスピードは0.005
+	リンゴを取るたびにブタのスピードが0.001大きくなる
+	ブタが追いかけてくる
+
+☆ void Keyboard(unsigned char key, int x, int y)
+501～526行目 : 難易度選択処理を追加
+
+☆ void setPigSpeed(double pig_speed)
+1178～1183行目
+ブタの速さを引数の数字にセットする
+
+☆ void changePigSpeed(double change_pig_speed)
+ブタの速さを引数分だけ増減する. まだ使う予定はない
+
+
