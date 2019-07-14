@@ -146,7 +146,7 @@ HARD
 
 
 2019/07/10
-ver2.6
+ver2.7
 Newwall.obj
 Newwall.mtl
 一番大きい壁のテクスチャがよりマシな感じになった
@@ -171,3 +171,22 @@ Newwall.mtl
 これにより豚の向いている方向からでは見つかりやすく, 後ろからならそれなりに近づいても気づかれないようになってゲームらしさが増した. 
 
 
+2019/07/15
+ver2.8
+リンゴが近づいた時に!が出るようになった
+[lib_ver2.8.h]
+☆ void AppleCheck()
+を追加
+
+[TMF_ver2.8.cpp]
+☆ void AppleCheck()
+1976行目～：リンゴアラート実装
+☆ void TimeLimit() 
+画像の選択ちゃんとした
+☆ void ObjMoveRoll_Camera(float hA, float vA, int i)
+1304行目：位置微調整
+1319行目～：リンゴアラートの位置制御追加
+☆ void PlayMode()
+1071行目:AppleCheck();を追加
+☆ void Initialize()
+194～237行目:画像の読み込み変更
