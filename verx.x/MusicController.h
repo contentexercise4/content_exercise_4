@@ -4,38 +4,41 @@
 
 #include "alut.h"
 
-//--------------------------
-// 0 : START
-// 1 : PLAY
-// 2 : RESULT
-//--------------------------
+
 int sound_check;			//BGMの種類を決める
 bool se_pig_check;			//ブタの鳴き声の1回目を制御
-float volume_BGM = 1.0f;	//BGMの音量
-float volume_PIG = 1.0f;	//ブタの鳴き声の音量
-float volume_WALL = 1.0f;	//壁に衝突したときの音量
+//int tmp = 0;
 
-int tmp = 0;
+//---volume---//
+float volume_BGM = 1.0f;		//BGMの音量
+float volume_PIG = 1.0f;		//ブタの鳴き声の音量
+float volume_WALL = 1.0f;		//壁に衝突したときの音量
+float volume_GetItem = 1.0f;	//アイテムを取得したときの音量
+float volume_gameover = 1.0f;	//ブタに当たってゲームオーバーになるときの音量
 
 //---SE---//
 ALuint seCollisionWall;		//壁に衝突するSE
 ALuint seCollisionEnemy;	//敵に衝突するSE
 ALuint seGetItem;			//アイテムを取得するSE
 ALuint sePig;				//ブタの鳴き声のSE
+ALuint seGameover;			//ブタに当たってゲームオーバーになるときのSE
 
 //---BGM---//
 ALuint bgmStart;			//スタート画面のBGM
 ALuint bgmPlay;				//プレイ画面のBGM
+ALuint bgmResult;			//リザルト画面のBGM
 
 //---souce SE---//
 ALuint sseCollisionWall;	//壁に衝突するsSE
 ALuint sseCollisionEnemy;	//敵に衝突するsSE
 ALuint sseGetItem;			//アイテムを取得するsSE
 ALuint ssePig;				//ブタの鳴き声のsSe
+ALuint sseGameover;			//ブタに当たってゲームオーバーになるときのsSE
 
 //---souce BGM---//
 ALuint sbgmStart;			//スタート画面のsBGM
 ALuint sbgmPlay;			//プレイ画面のsBGM
+ALuint sbgmResult;			//リザルト画面のsBGM
 
 int countCollisionWall = 0;		//壁に衝突時のSEを連座奥再生しないように制御する
 int initCountCollision = 300;	//countがこの値を超えたら0に初期化する
@@ -52,6 +55,8 @@ bool chackDoubleSpecialKeyPush();
 void decideVolumeOfPigCry(double disFromPig);
 float getDuration(ALuint buffer);
 float getOffset(ALuint source);
+void allSoundStop();
+void allSeStop();
 
 #endif
 
