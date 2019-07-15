@@ -14,12 +14,18 @@ float volume_BGM = 1.0f;		//BGMの音量
 float volume_PIG = 1.0f;		//ブタの鳴き声の音量
 float volume_WALL = 1.0f;		//壁に衝突したときの音量
 float volume_GetItem = 1.0f;	//アイテムを取得したときの音量
+float volume_gameover = 1.0f;	//ブタに当たってゲームオーバーになるときの音量
+float volume_gameclear = 1.0f;	//りんごを4つ取ってゲームクリアになるときの音量
+float volume_timeup = 1.0f;		//制限時間切れになったときの音量
 
 //---SE---//
 ALuint seCollisionWall;		//壁に衝突するSE
 ALuint seCollisionEnemy;	//敵に衝突するSE
 ALuint seGetItem;			//アイテムを取得するSE
 ALuint sePig;				//ブタの鳴き声のSE
+ALuint seGameover;			//ブタに当たってゲームオーバーになるときのSE
+ALuint seGameclear;			//りんごを4つ取ってゲームクリアになるときのSE
+ALuint seTimeup;			//制限時間切れになったときのSE
 
 //---BGM---//
 ALuint bgmStart;			//スタート画面のBGM
@@ -31,6 +37,9 @@ ALuint sseCollisionWall;	//壁に衝突するsSE
 ALuint sseCollisionEnemy;	//敵に衝突するsSE
 ALuint sseGetItem;			//アイテムを取得するsSE
 ALuint ssePig;				//ブタの鳴き声のsSe
+ALuint sseGameover;			//ブタに当たってゲームオーバーになるときのsSE
+ALuint sseGameclear;		//りんごを4つ取ってゲームクリアになるときのsSe
+ALuint sseTimeup;			//制限時間切れになったときのsSe
 
 //---souce BGM---//
 ALuint sbgmStart;			//スタート画面のsBGM
@@ -52,6 +61,8 @@ bool chackDoubleSpecialKeyPush();
 void decideVolumeOfPigCry(double disFromPig);
 float getDuration(ALuint buffer);
 float getOffset(ALuint source);
+void allSoundStop();
+void allSeStop();
 
 #endif
 
