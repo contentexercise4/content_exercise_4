@@ -210,3 +210,9 @@ ver3.0.3
 void GameReset()
 リセット時に豚の座標と空のフラグを戻すようにした
 
+2019/07/16
+ver3.0.4
+bool objhit2
+OBJMove
+左の壁消失バグ修正
+
