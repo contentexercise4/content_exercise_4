@@ -863,146 +863,148 @@ void moveOBJ() {
 	hspeed = 1.0f;
 	//int changePos = 5;			//カメラの向きを動かす速さ
 
-	//--カメラの向きの制御--//
-	if (objflag.xposInc) {
-		xpos += changePos;
-	}
-	if (objflag.xposDec) {
-		xpos -= changePos;
-	}
-	if (objflag.yposInc) {
-		ypos += changePos;
-	}
-	if (objflag.yposDec) {
-		ypos -= changePos;
-	}
-
-	//--FoVの値を制御--//
-	if (objflag.FoVInc) {
-		FoV = initialFoV - 5 * 3.0f;
-	}
-	if (objflag.FoVDec) {
-		FoV = initialFoV + 5 * 3.0f;
-	}
-	/*
-	//--壁の衝突を制御--//
-	if (objflag.hitUP) {
-		position -= direction * deltaTime * hspeed;
-	}
-	if (objflag.hitDOWN) {
-		position += direction * deltaTime * hspeed;
-	}
-	if (objflag.hitRIGHT) {
-		position -= right_vec3 * deltaTime * hspeed;
-	}
-	if (objflag.hitLEFT) {
-		position += right_vec3 * deltaTime * hspeed;
-	}
-	*/
-
-	//--壁の衝突SEを制御--//
-	if (countCollisionWall > initCountCollision) {
-		countCollisionWall = 0;
-	}
-
-	if (hit(cube)) {
-		//std::cout << "HIT\n";
-	}
-
-	//--主人公の座標を制御--//
-	if (objflag.keyUP) {
-		//	if (objflag.keyUP || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28) {
-		position += direction * deltaTime * speed;
-
-		if (hit(cube) == true || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28|| (position.x > 13 && position.x < 16 && position.z > -3.5 && position.z < 5)) {
-			if (countCollisionWall == 0) {
-				allSeStop();
-				//std::cout << "UP WALL\n";
-				soundPlay(seCollisionWall, &sseCollisionWall, false, volume_WALL);
-			}
-			countCollisionWall++;
-			position -= direction * deltaTime * speed;
+	if (!gameEnd) {
+		//--カメラの向きの制御--//
+		if (objflag.xposInc) {
+			xpos += changePos;
 		}
-		else {
-			if (!chackDoubleSpecialKeyPush) {
-				countCollisionWall = 0;
-			}
-			else {
-				countCollisionWall++;
-			}
+		if (objflag.xposDec) {
+			xpos -= changePos;
+		}
+		if (objflag.yposInc) {
+			ypos += changePos;
+		}
+		if (objflag.yposDec) {
+			ypos -= changePos;
 		}
 
-	}
-	//if (objflag.keyDOWN || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28) {
-	if (objflag.keyDOWN){
-		position -= direction * deltaTime * speed;
+		//--FoVの値を制御--//
+		if (objflag.FoVInc) {
+			FoV = initialFoV - 5 * 3.0f;
+		}
+		if (objflag.FoVDec) {
+			FoV = initialFoV + 5 * 3.0f;
+		}
+		/*
+		//--壁の衝突を制御--//
+		if (objflag.hitUP) {
+			position -= direction * deltaTime * hspeed;
+		}
+		if (objflag.hitDOWN) {
+			position += direction * deltaTime * hspeed;
+		}
+		if (objflag.hitRIGHT) {
+			position -= right_vec3 * deltaTime * hspeed;
+		}
+		if (objflag.hitLEFT) {
+			position += right_vec3 * deltaTime * hspeed;
+		}
+		*/
 
-		if (hit(cube) == true || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28 || (position.x > 13 && position.x < 16 && position.z > -3.5 && position.z < 5)) {
-			if (countCollisionWall == 0) {
-				allSeStop();
-				//std::cout << "DOWN WALL\n";
-				soundPlay(seCollisionWall, &sseCollisionWall, false, volume_WALL);
-			}
-			countCollisionWall++;
+		//--壁の衝突SEを制御--//
+		if (countCollisionWall > initCountCollision) {
+			countCollisionWall = 0;
+		}
+
+		if (hit(cube)) {
+			//std::cout << "HIT\n";
+		}
+
+		//--主人公の座標を制御--//
+		if (objflag.keyUP) {
+			//	if (objflag.keyUP || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28) {
 			position += direction * deltaTime * speed;
-		}
-		else {
-			if (!chackDoubleSpecialKeyPush) {
-				countCollisionWall = 0;
+
+			if (hit(cube) == true || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28 || (position.x > 13 && position.x < 16 && position.z > -3.5 && position.z < 5)) {
+				if (countCollisionWall == 0) {
+					allSeStop();
+					//std::cout << "UP WALL\n";
+					soundPlay(seCollisionWall, &sseCollisionWall, false, volume_WALL);
+				}
+				countCollisionWall++;
+				position -= direction * deltaTime * speed;
 			}
 			else {
+				if (!chackDoubleSpecialKeyPush) {
+					countCollisionWall = 0;
+				}
+				else {
+					countCollisionWall++;
+				}
+			}
+
+		}
+		//if (objflag.keyDOWN || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28) {
+		if (objflag.keyDOWN) {
+			position -= direction * deltaTime * speed;
+
+			if (hit(cube) == true || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28 || (position.x > 13 && position.x < 16 && position.z > -3.5 && position.z < 5)) {
+				if (countCollisionWall == 0) {
+					allSeStop();
+					//std::cout << "DOWN WALL\n";
+					soundPlay(seCollisionWall, &sseCollisionWall, false, volume_WALL);
+				}
 				countCollisionWall++;
-			}
-		}
-
-	}
-	
-	//if (objflag.keyRIGHT || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28) {
-	if (objflag.keyRIGHT) {
-		position += right_vec3 * deltaTime * speed;
-
-		if (hit(cube) == true || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28 || (position.x > 13 && position.x < 16 && position.z > -3.5 && position.z < 5)) {
-			if (countCollisionWall == 0) {
-				allSeStop();
-				//std::cout << "RIGHT WALL\n";
-				soundPlay(seCollisionWall, &sseCollisionWall, false, volume_WALL);
-			}
-			countCollisionWall++;
-			position -= right_vec3 * deltaTime * speed;
-		}
-		else {
-			if (!chackDoubleSpecialKeyPush) {
-				countCollisionWall = 0;
+				position += direction * deltaTime * speed;
 			}
 			else {
-				countCollisionWall++;
+				if (!chackDoubleSpecialKeyPush) {
+					countCollisionWall = 0;
+				}
+				else {
+					countCollisionWall++;
+				}
 			}
+
 		}
 
-	}
-	
-	//if (objflag.keyLEFT || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28) {
-	if (objflag.keyLEFT){
-		position -= right_vec3 * deltaTime * speed;
-
-		if (hit(cube) == true || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28 || (position.x > 13 && position.x < 16 && position.z > -3.5 && position.z < 5)) {
-			if (countCollisionWall == 0) {
-				allSeStop();
-				//std::cout << "LEFT WALL\n";
-				soundPlay(seCollisionWall, &sseCollisionWall, false, volume_WALL);
-			}
-			countCollisionWall++;
+		//if (objflag.keyRIGHT || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28) {
+		if (objflag.keyRIGHT) {
 			position += right_vec3 * deltaTime * speed;
-		}
-		else {
-			if (!chackDoubleSpecialKeyPush) {
-				countCollisionWall = 0;
+
+			if (hit(cube) == true || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28 || (position.x > 13 && position.x < 16 && position.z > -3.5 && position.z < 5)) {
+				if (countCollisionWall == 0) {
+					allSeStop();
+					//std::cout << "RIGHT WALL\n";
+					soundPlay(seCollisionWall, &sseCollisionWall, false, volume_WALL);
+				}
+				countCollisionWall++;
+				position -= right_vec3 * deltaTime * speed;
 			}
 			else {
-				countCollisionWall++;
+				if (!chackDoubleSpecialKeyPush) {
+					countCollisionWall = 0;
+				}
+				else {
+					countCollisionWall++;
+				}
 			}
+
 		}
 
+		//if (objflag.keyLEFT || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28) {
+		if (objflag.keyLEFT) {
+			position -= right_vec3 * deltaTime * speed;
+
+			if (hit(cube) == true || position.x > 30 || position.x < -30 || position.z < -30 || position.z>28 || (position.x > 13 && position.x < 16 && position.z > -3.5 && position.z < 5)) {
+				if (countCollisionWall == 0) {
+					allSeStop();
+					//std::cout << "LEFT WALL\n";
+					soundPlay(seCollisionWall, &sseCollisionWall, false, volume_WALL);
+				}
+				countCollisionWall++;
+				position += right_vec3 * deltaTime * speed;
+			}
+			else {
+				if (!chackDoubleSpecialKeyPush) {
+					countCollisionWall = 0;
+				}
+				else {
+					countCollisionWall++;
+				}
+			}
+
+		}
 	}
 
 	// 新たな方向を計算します。
