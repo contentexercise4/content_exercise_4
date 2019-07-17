@@ -2610,14 +2610,15 @@ void InitMusic() {
 
 
 	//---alutの機能の初期化(SE)---//
-	//seCollisionWall = alutCreateBufferFromFile("SE/CollisionWall.wav");
-	//sePig = alutCreateBufferFromFile("SE/Pig2.wav");
-	//seGetItem = alutCreateBufferFromFile("SE/GetItem.wav");
-	//seGameover = alutCreateBufferFromFile("SE/gameover.wav");
-	//seGameclear = alutCreateBufferFromFile("SE/gameclear.wav");
-	//seTimeup = alutCreateBufferFromFile("SE/timeup.wav");
+	seCollisionWall = alutCreateBufferFromFile("SE/CollisionWall.wav");
+	sePig = alutCreateBufferFromFile("SE/Pig2.wav");
+	//sePig = alutCreateBufferFromFile("SE/Pig3.wav");
+	seGetItem = alutCreateBufferFromFile("SE/GetItem.wav");
+	seGameover = alutCreateBufferFromFile("SE/gameover.wav");
+	seGameclear = alutCreateBufferFromFile("SE/gameclear.wav");
+	seTimeup = alutCreateBufferFromFile("SE/timeup.wav");
 
-		//---1回音ならせばブタの鳴き声にもかき消されないことがわかったので初期化のタイミングでvolume0でならす---//
+	//---1回音ならせばブタの鳴き声にもかき消されないことがわかったので初期化のタイミングでvolume0でならす---//
 	//soundPlay(seCollisionWall, &sseCollisionWall, false, 0.0f);
 	//soundPlay(seGetItem, &sseGetItem, false, 0.0f);
 	//soundPlay(seGameover, &sseGameover, false, 0.0f);
