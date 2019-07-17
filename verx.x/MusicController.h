@@ -63,6 +63,7 @@ float getDuration(ALuint buffer);
 float getOffset(ALuint source);
 void allSoundStop();
 void allSeStop();
+void soundAllDelete();
 
 #endif
 
